@@ -1,7 +1,7 @@
 // Copyright (c) 2020, Ahmed Mohammed Alkuhlani and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Employee Checkin Manual', {
+frappe.ui.form.on('Employee Checkin Request', {
 	employee: function(frm) {
 		frm.trigger("set_leave_approver");
 	},

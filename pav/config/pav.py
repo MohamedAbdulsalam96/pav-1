@@ -46,6 +46,14 @@ def get_data():
 					"onboard": 1,
 					"dependencies": ["Employee"],
 				},
+				{
+					"type": "doctype",
+					"name": "Employee Checkin Request",
+					"description":_("Employee Checkin Request"),
+					"onboard": 1,
+					"dependencies": ["Employee"],
+				},
+
 			]
 		},
 		{
