@@ -1,0 +1,151 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-10-02 22:15:31.794646",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "payroll_entry",
+  "start_date",
+  "end_date",
+  "payroll_account",
+  "payment_account",
+  "column_break_9",
+  "posting_date",
+  "company",
+  "cost_center",
+  "project_dimension",
+  "project",
+  "project_activities",
+  "journal_entry_submitted",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "ACC-PAY-TOOL-"
+  },
+  {
+   "fieldname": "payroll_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payroll Entry",
+   "options": "Payroll Entry",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Payroll Entry Tool",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Select Payment Account to make Bank Entry",
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Payment Account",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "project_dimension.project",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project_activities",
+   "fieldtype": "Link",
+   "label": "Project Activities",
+   "options": "Project Activities"
+  },
+  {
+   "fieldname": "project_dimension",
+   "fieldtype": "Link",
+   "label": "Project Dimension",
+   "options": "Project Dimension"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "description": "Select Paypal Payroll Account to make Accrual JV",
+   "fieldname": "payroll_account",
+   "fieldtype": "Link",
+   "label": "Payroll Account",
+   "options": "Account"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "journal_entry_submitted",
+   "fieldtype": "Check",
+   "label": "Journal Entry Submitted",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payroll_entry.start_date",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payroll_entry.end_date",
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2020-10-05 04:01:22.619030",
+ "modified_by": "Administrator",
+ "module": "PAV",
+ "name": "Payroll Entry Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

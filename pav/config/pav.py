@@ -53,7 +53,13 @@ def get_data():
 					"onboard": 1,
 					"dependencies": ["Employee"],
 				},
-
+				{
+					"type": "doctype",
+					"name": "Payroll Entry Tool",
+					"description":_("Payroll Entry Tool"),
+					"onboard": 1,
+					"dependencies": ["Payroll Entry"],
+				},
 			]
 		},
 		{
