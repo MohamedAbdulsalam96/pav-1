@@ -8,6 +8,7 @@
   "project",
   "project_title",
   "project_name",
+  "customer",
   "status"
  ],
  "fields": [
@@ -43,10 +44,18 @@
    "fieldtype": "Data",
    "label": "Project Title",
    "read_only": 1
+  },
+  {
+   "fetch_from": "project.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Funder",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
- "modified": "2020-09-24 08:52:11.165083",
- "modified_by": "a.kuhlani@partner-cons.com",
+ "modified": "2020-10-18 12:44:24.619744",
+ "modified_by": "Administrator",
  "module": "PAV",
  "name": "Project Dimension",
  "owner": "Administrator",
@@ -69,7 +78,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "\u0627\u0644\u0645\u0627\u0644\u064a\u0629",
+   "role": "Accounts Manager",
    "share": 1,
    "write": 1
   },

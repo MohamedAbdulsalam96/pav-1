@@ -37,6 +37,38 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Accounting MC"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Advance Request MC",
+					"description":_("Advance Request MC"),
+					"onboard": 1,
+					"dependencies": ["Mode of Payment", "Employee"],
+				},
+				{
+					"type": "doctype",
+					"name": "Expense Entry MC",
+					"description":_("Expense Entry MC"),
+					"onboard": 1,
+					"dependencies": ["Expense Type MC"],
+				},
+				{
+					"type": "doctype",
+					"name": "Expense Type MC",
+					"description":_("Expense Type MC"),
+					"onboard": 1,
+					"dependencies": ["Account"],
+				},
+				{
+					"type": "report",
+					"name": "Trial Balance for Employee MC",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+			]
+		},
+		{
 			"label": _("HR"),
 			"items": [
 				{

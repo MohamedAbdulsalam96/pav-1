@@ -1,0 +1,29 @@
+{
+ "creation": "2020-10-09 22:39:47.104998",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-10-09 22:39:47.104998",
+ "modified_by": "Administrator",
+ "module": "PAV",
+ "name": "Attendance Salary Tool Employee",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

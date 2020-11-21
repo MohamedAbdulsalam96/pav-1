@@ -9,16 +9,23 @@
   "payroll_entry",
   "start_date",
   "end_date",
+  "is_payable",
+  "payroll_payable_account",
   "payroll_account",
   "payment_account",
+  "round_off_account",
+  "currency",
+  "conversion_rate",
+  "difference",
   "column_break_9",
   "posting_date",
   "company",
   "cost_center",
+  "customer",
   "project_dimension",
   "project",
   "project_activities",
-  "journal_entry_submitted",
+  "accrual_jv",
   "amended_from"
  ],
  "fields": [
@@ -53,7 +60,7 @@
    "options": "Account"
   },
   {
-   "fetch_from": "project_dimension.project",
+   "fetch_from": "project_activities.project",
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -67,10 +74,12 @@
    "options": "Project Activities"
   },
   {
+   "fetch_from": "project_activities.project_dimension",
    "fieldname": "project_dimension",
    "fieldtype": "Link",
    "label": "Project Dimension",
-   "options": "Project Dimension"
+   "options": "Project Dimension",
+   "read_only": 1
   },
   {
    "fieldname": "cost_center",
@@ -82,23 +91,16 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
+   "depends_on": "eval:doc.is_payable==0",
    "description": "Select Paypal Payroll Account to make Accrual JV",
    "fieldname": "payroll_account",
    "fieldtype": "Link",
    "label": "Payroll Account",
    "options": "Account"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "journal_entry_submitted",
-   "fieldtype": "Check",
-   "label": "Journal Entry Submitted",
-   "no_copy": 1,
-   "read_only": 1
   },
   {
    "fetch_from": "payroll_entry.start_date",
@@ -123,10 +125,65 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_payable",
+   "fieldtype": "Check",
+   "label": "Is Payable"
+  },
+  {
+   "depends_on": "eval:doc.is_payable==1",
+   "fieldname": "payroll_payable_account",
+   "fieldtype": "Link",
+   "label": "Payroll Payable Account",
+   "options": "Account"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "accrual_jv",
+   "fieldtype": "Link",
+   "label": "Accrual JV",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "project.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Funder",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "round_off_account",
+   "fieldtype": "Link",
+   "label": "Round Off Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "default": "1",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate"
+  },
+  {
+   "fieldname": "difference",
+   "fieldtype": "Currency",
+   "label": "Difference (Dr - Cr)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-10-05 04:01:22.619030",
+ "modified": "2020-10-24 11:55:13.419990",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Payroll Entry Tool",

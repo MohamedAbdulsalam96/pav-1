@@ -1,0 +1,64 @@
+{
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:expense_type",
+ "creation": "2020-11-08 03:03:01.966038",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "expense_type",
+  "description",
+  "accounts"
+ ],
+ "fields": [
+  {
+   "fieldname": "expense_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Expense Type",
+   "oldfieldname": "expense_type",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Small Text",
+   "width": "300px"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounts",
+   "options": "Expense Type Account MC"
+  }
+ ],
+ "icon": "fa fa-flag",
+ "modified": "2020-11-09 15:28:33.400810",
+ "modified_by": "Administrator",
+ "module": "PAV",
+ "name": "Expense Type MC",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Employee"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC"
+}

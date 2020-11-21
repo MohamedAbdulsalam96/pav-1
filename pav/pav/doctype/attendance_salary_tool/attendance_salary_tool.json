@@ -1,0 +1,202 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-10-09 22:50:38.296175",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "is_for_all",
+  "selected_employees",
+  "is_open_period",
+  "start_date",
+  "end_date",
+  "column_break_3",
+  "posting_date",
+  "day_rate",
+  "section_break_5",
+  "employees",
+  "section_break_9",
+  "number_of_employees",
+  "total_attendance_days",
+  "total_amount",
+  "column_break_16",
+  "company",
+  "cost_center",
+  "payroll_payable_account",
+  "expense_account",
+  "accrual_jv",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "is_for_all",
+   "fieldtype": "Check",
+   "label": "Is For All"
+  },
+  {
+   "depends_on": "eval:doc.is_for_all==0",
+   "fieldname": "selected_employees",
+   "fieldtype": "Table MultiSelect",
+   "label": "Selected Employees",
+   "options": "Attendance Salary Tool Employee"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Attendance Salary Tool",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "HR-AST-.YYYY.-"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "day_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Day Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_open_period",
+   "fieldtype": "Check",
+   "label": "Is Open Period"
+  },
+  {
+   "default": "Today",
+   "depends_on": "eval:doc.is_open_period==0",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "default": "Today",
+   "depends_on": "eval:doc.is_open_period==0",
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "employees",
+   "fieldtype": "Table",
+   "label": "Detail",
+   "no_copy": 1,
+   "options": "Attendance Salary Tool Detail",
+   "read_only": 1
+  },
+  {
+   "default": "0.0",
+   "fieldname": "total_attendance_days",
+   "fieldtype": "Float",
+   "label": "Total Attendance Days",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "number_of_employees",
+   "fieldtype": "Int",
+   "label": "Number of Employees",
+   "no_copy": 1,
+   "options": "number_of_employees",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payroll_payable_account",
+   "fieldtype": "Link",
+   "label": "Payroll Payable Account",
+   "options": "Account",
+   "remember_last_selected_value": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "remember_last_selected_value": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "accrual_jv",
+   "fieldtype": "Link",
+   "label": "accrual_jv",
+   "options": "Journal Entry",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2020-10-10 01:27:22.729056",
+ "modified_by": "Administrator",
+ "module": "PAV",
+ "name": "Attendance Salary Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

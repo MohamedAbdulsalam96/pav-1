@@ -10,6 +10,7 @@
   "mode_of_payment",
   "payment_account",
   "payment_currency",
+  "currency",
   "conversion_rate",
   "expense_currency",
   "column_break_5",
@@ -283,11 +284,18 @@
    "label": "Expense Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fetch_from": "payment_account.account_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "icon": "fa fa-money",
  "is_submittable": 1,
- "modified": "2020-09-14 08:00:25.617652",
+ "modified": "2020-11-03 14:34:47.808450",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Expense Entry",
