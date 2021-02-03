@@ -113,9 +113,7 @@ def get_cost_centers(filters):
 	if filters.get("budget_against") == "Cost Center":
 		order_by = "order by lft"
 
-	project_dimension2=filters.get("project_dimension")
-	cond2 = """ where project_dimension= "{project_dimension}"
-		""".format(project_dimension=project_dimension2) if project_dimension2 else """ """
+	
 
 	if filters.get("budget_against") in ["Cost Center", "Project"]:
 		return frappe.db.sql_list(
@@ -135,8 +133,8 @@ def get_cost_centers(filters):
 				select
 					name
 				from
-					`tab{tab}` {cond2}
-			""".format(tab=filters.get("budget_against"), cond2=cond2))  # nosec
+					`tab{tab}` 
+			""".format(tab=filters.get("budget_against")))  # nosec
 
 
 # Get dimension & target details
@@ -210,7 +208,7 @@ def get_target_distribution_details(filters):
 # Get actual details from gl entry
 def get_actual_details(name, filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
-	project_dimension2=filters.get("project_dimension")
+	
 	cond = ""
 
 	if filters.get("budget_against") == "Cost Center":
@@ -219,8 +217,7 @@ def get_actual_details(name, filters):
 				and lft >= "{lft}"
 				and rgt <= "{rgt}"
 			""".format(lft=cc_lft, rgt=cc_rgt)
-	cond2 = """ and gl.project_dimension= "{project_dimension}"
-		""".format(project_dimension=project_dimension2) if project_dimension2 else """ """
+	
 
 	ac_details = frappe.db.sql(
 		"""
@@ -249,13 +246,13 @@ def get_actual_details(name, filters):
 						`tab{tab}`
 					where
 						name = gl.{budget_against}
-						{cond} {cond2}
+						{cond} 
 				)
-				{cond2}
+				
 				group by
 					gl.name
 				order by gl.fiscal_year
-		""".format(tab=filters.budget_against, budget_against=budget_against, cond=cond, cond2=cond2),
+		""".format(tab=filters.budget_against, budget_against=budget_against, cond=cond),
 		(filters.from_fiscal_year, filters.to_fiscal_year, name), as_dict=1)
 
 	cc_actual_details = {}

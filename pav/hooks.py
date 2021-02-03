@@ -90,13 +90,22 @@ app_license = "MIT"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"pav.tasks.all"
-# 	],
-# 	"daily": [
-# 		"pav.tasks.daily"
-# 	],
+scheduler_events = {
+ 	"all": [
+ 		"pav.pav.utils.leave_auto_approve"
+ 	],
+    "daily": [
+		"pav.pav.utils.leave_auto_approve"
+    ],
+	"daily_long": [
+		"pav.pav.utils.leave_auto_approve"
+    ],
+	"hourly": [
+		"pav.pav.utils.leave_auto_approve"
+    ],
+	"hourly_long": [
+		"pav.pav.utils.leave_auto_approve"
+    ],	
 # 	"hourly": [
 # 		"pav.tasks.hourly"
 # 	],
@@ -106,7 +115,7 @@ app_license = "MIT"
 # 	"monthly": [
 # 		"pav.tasks.monthly"
 # 	]
-# }
+}
 
 # Testing
 # -------

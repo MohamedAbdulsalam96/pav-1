@@ -40,13 +40,7 @@ frappe.query_reports["Budget Variance Report for Project Activities"] = {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1
-		},
-		{
-			fieldname: "project_dimension",
-			label: __("Project Dimension"),
-			fieldtype: "Link",
-			options: "Project Dimension",
-		},
+		},		
 		{
 			fieldname: "budget_against",
 			label: __("Budget Against"),

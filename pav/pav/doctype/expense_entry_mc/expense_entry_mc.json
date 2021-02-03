@@ -134,7 +134,8 @@
    "in_list_view": 1,
    "label": "Amount",
    "options": "currency",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "base_amount",
@@ -201,7 +202,8 @@
   {
    "fieldname": "user_remark",
    "fieldtype": "Small Text",
-   "label": "User Remark"
+   "label": "User Remark",
+   "reqd": 1
   },
   {
    "fieldname": "title",
@@ -221,7 +223,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-11-09 16:34:21.658437",
+ "modified": "2020-11-11 11:14:52.633247",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Expense Entry MC",

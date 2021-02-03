@@ -182,6 +182,13 @@ def get_columns(filters, show_party_name):
 			"width": 50
 		},
 		{
+			"fieldname": "opening_debit",
+			"label": _("Opening (Dr)"),
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120
+		},
+		{
 			"fieldname": "opening_credit",
 			"label": _("Opening (Cr)"),
 			"fieldtype": "Currency",

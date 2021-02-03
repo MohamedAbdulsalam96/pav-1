@@ -70,7 +70,7 @@
    "label": "Amount",
    "oldfieldname": "claim_amount",
    "oldfieldtype": "Currency",
-   "options": "payment_currency",
+   "options": "currency",
    "print_width": "150px",
    "reqd": 1,
    "width": "150px"
@@ -130,7 +130,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-09-14 08:00:57.257995",
+ "modified": "2020-12-21 12:23:29.953325",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Expense Entry Detail",

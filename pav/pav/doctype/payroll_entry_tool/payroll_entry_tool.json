@@ -22,7 +22,6 @@
   "company",
   "cost_center",
   "customer",
-  "project_dimension",
   "project",
   "project_activities",
   "accrual_jv",
@@ -72,14 +71,6 @@
    "fieldtype": "Link",
    "label": "Project Activities",
    "options": "Project Activities"
-  },
-  {
-   "fetch_from": "project_activities.project_dimension",
-   "fieldname": "project_dimension",
-   "fieldtype": "Link",
-   "label": "Project Dimension",
-   "options": "Project Dimension",
-   "read_only": 1
   },
   {
    "fieldname": "cost_center",
@@ -183,7 +174,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-10-24 11:55:13.419990",
+ "modified": "2020-12-14 17:09:07.064892",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Payroll Entry Tool",

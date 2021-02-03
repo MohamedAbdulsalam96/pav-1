@@ -33,7 +33,7 @@ frappe.ui.form.on('Expense Entry MC', {
 			});
 		}else{
 			frm.set_df_property('title',  'read_only',  1);
-			frm.set_value("title", (frm.doc.task)?frm.doc.task+" Expenses":"Test Title");
+			frm.set_value("title", (frm.doc.user_remark)?frm.doc.user_remark:"Test Title");
 		}
         	if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(__('Accounting Ledger'), function () {

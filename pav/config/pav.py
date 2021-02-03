@@ -22,17 +22,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Project Dimension",
-					"description":_("Project Dimension"),
-					"onboard": 1,
-					"dependencies": ["Project"],
-				},
-				{
-					"type": "doctype",
 					"name": "Project Activities",
 					"description":_("Project Activities"),
 					"onboard": 1,
-					"dependencies": ["Project Dimension"],
+					"dependencies": ["Project"],
 				},
 			]
 		},

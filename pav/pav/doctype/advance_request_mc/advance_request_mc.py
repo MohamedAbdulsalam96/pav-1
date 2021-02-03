@@ -86,13 +86,15 @@ class AdvanceRequestMC(AccountsController):
 				ea = frappe.new_doc('Employee Account')
 				ea.employee=self.employee
 				ea.currency=self.currency
-				ea.save()
+				ea.db_insert()
+				ea.submit()
 
 	def validate_employee(self):
 		if self.type=='Employee':
 			employee_account=frappe.db.get_value("Employee Account",{"employee": self.employee,"currency":self.currency}, "name")
 			if not employee_account:
 				ea = frappe.new_doc('Employee Account')
+				ea.flags.ignore_permissions = 1
 				ea.employee=self.employee
 				ea.currency=self.currency
 				ea.save()

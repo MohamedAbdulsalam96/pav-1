@@ -30,11 +30,11 @@ class ExpenseEntry(AccountsController):
 		if not self.company or not self.default_currency:
 			frappe.throw(_("""Compnay is Mandatory"""))
 		for data in self.expenses:
-			if self.account_currency != self.payment_currency or self.account_currency != self.default_currency:
+			if self.account_currency != self.currency or self.account_currency != self.default_currency:
 				frappe.throw(_("""Currency of {0} must to be Same Currency of Payment or Company Currency""").format(self.expense_type))
 
 	def validate_currency(self):
-		if self.default_currency==self.payment_currency:
+		if self.default_currency==self.currency:
 			self.conversion_rate=1.0
 		for data in self.expenses:
 			if not data.cost_center:
@@ -102,7 +102,7 @@ class ExpenseEntry(AccountsController):
 		for data in self.expenses:
 			gl_entry.append(
 				self.get_gl_dict({
-					"posting_date": self.posting_date,
+					"posting_date": self.posting_date,					
 					"account": data.default_account,
 					"account_currency": data.account_currency,
 					"debit": data.base_amount,
@@ -121,11 +121,13 @@ class ExpenseEntry(AccountsController):
 			gl_entry.append(
 				self.get_gl_dict({
 					"posting_date": self.posting_date,
+					"party_type": '' if self.type!='Employee Account' else self.type,
+					"party": '' if self.type!='Employee Account' else self.party,
 					"account": self.payment_account,
-					"account_currency": self.payment_currency,
+					"account_currency": self.currency,
 					"credit": self.base_total_amount,
 					"credit_in_account_currency": self.total_amount,
-					"conversion_rate":self.conversion_rate if self.payment_currency!=self.default_currency else 1.0,
+					"conversion_rate":self.conversion_rate if self.currency!=self.default_currency else 1.0,
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"against_voucher_type": self.doctype,
 					"against_voucher": self.name,

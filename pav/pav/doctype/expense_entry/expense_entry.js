@@ -7,25 +7,25 @@ frappe.provide("pav.pav");
 pav.pav.ExpenseEntryController = frappe.ui.form.Controller.extend({
     amount: function (doc, cdt, cdn) {
         var child = locals[cdt][cdn];
-	if(!child.default_account || !child.account_currency){
-		frappe.msgprint(__("Please set the Expense Type First"));
-	    	return;
-	}else if(!doc.company || !doc.default_currency){
-		frappe.msgprint(__("Please set the Company First"));
-	    	return;
-	}else{
-		console.log("child.account_currency="+child.account_currency)
-		console.log("doc.payment_currency="+doc.payment_currency)
-		console.log("doc.default_currency="+doc.default_currency)
-	        //frappe.model.set_value(cdt, cdn, 'account_amount', child.amount * (child.account_currency==doc.payment_currency?1:doc.conversion_rate));
-        	//frappe.model.set_value(cdt, cdn, 'base_amount', (child.amount * (child.account_currency==doc.payment_currency?1:doc.conversion_rate)) * (child.account_currency==doc.default_account?1:1/doc.conversion_rate));
-	        frappe.model.set_value(cdt, cdn, 'account_amount', 
-			child.amount * (child.account_currency==doc.payment_currency?1:doc.conversion_rate));
-        	frappe.model.set_value(cdt, cdn, 'base_amount',
-			child.account_currency==doc.default_currency?
-				(child.amount * (child.account_currency==doc.payment_currency?1:doc.conversion_rate)):
-				(child.amount * (child.account_currency==doc.payment_currency?1:doc.conversion_rate))*(doc.conversion_rate))
-	}
+        if (!child.default_account || !child.account_currency) {
+            frappe.msgprint(__("Please set the Expense Type First"));
+            return;
+        } else if (!doc.company || !doc.default_currency) {
+            frappe.msgprint(__("Please set the Company First"));
+            return;
+        } else {
+            console.log("child.account_currency=" + child.account_currency)
+            console.log("doc.currency=" + doc.currency)
+            console.log("doc.default_currency=" + doc.default_currency)
+            //frappe.model.set_value(cdt, cdn, 'account_amount', child.amount * (child.account_currency==doc.currency?1:doc.conversion_rate));
+            //frappe.model.set_value(cdt, cdn, 'base_amount', (child.amount * (child.account_currency==doc.currency?1:doc.conversion_rate)) * (child.account_currency==doc.default_account?1:1/doc.conversion_rate));
+            frappe.model.set_value(cdt, cdn, 'account_amount',
+                child.amount * (child.account_currency == doc.currency ? 1 : doc.conversion_rate));
+            frappe.model.set_value(cdt, cdn, 'base_amount',
+                child.account_currency == doc.default_currency ?
+                    (child.amount * (child.account_currency == doc.currency ? 1 : doc.conversion_rate)) :
+                    (child.amount * (child.account_currency == doc.currency ? 1 : doc.conversion_rate)) * (doc.conversion_rate))
+        }
     },
 
     expense_type: function (doc, cdt, cdn) {
@@ -48,25 +48,25 @@ pav.pav.ExpenseEntryController = frappe.ui.form.Controller.extend({
             },
             callback: function (r) {
                 if (r.message) {
-			console.log("doc.payment_currency="+doc.payment_currency)
-			console.log("doc.default_currency="+doc.default_currency)
-			console.log("r.message.account_currency="+r.message.account_currency)
+                    console.log("doc.currency=" + doc.currency)
+                    console.log("doc.default_currency=" + doc.default_currency)
+                    console.log("r.message.account_currency=" + r.message.account_currency)
                     d.default_account = r.message.account;
                     d.account_currency = r.message.account_currency;
-                    if (doc.payment_currency != r.message.account_currency && doc.default_currency != r.message.account_currency) {
+                    if (doc.currency != r.message.account_currency && doc.default_currency != r.message.account_currency) {
                         frappe.msgprint(__("Expense Currency must to be equal Payment Currency or Company Currency"));
                     }
                 }
             }
         });
-	cur_frm.refresh_field('expenses');
+        cur_frm.refresh_field('expenses');
 
     }
 });
 
 $.extend(cur_frm.cscript, new pav.pav.ExpenseEntryController({
-        frm: cur_frm
-    }));
+    frm: cur_frm
+}));
 
 cur_frm.add_fetch('expense_type', 'description', 'description');
 
@@ -86,34 +86,34 @@ cur_frm.cscript.set_help = function (doc) {
 
 cur_frm.cscript.validate = function (doc) {
     $.each(doc.expenses || [], function (i, d) {
-        if (doc.payment_currency != d.account_currency && doc.default_currency != d.account_currency) {
-		frappe.throw(__("Expense Currency must to be equal Payment Currency or Company Currency in Row "+(i+1)));
-	}
+        if (doc.currency != d.account_currency && doc.default_currency != d.account_currency) {
+            frappe.throw(__("Expense Currency must to be equal Payment Currency or Company Currency in Row " + (i + 1)));
+        }
 
         //d.base_amount = d.amount * doc.conversion_rate
-	d.account_amount=d.amount * (d.account_currency==doc.payment_currency?1:doc.conversion_rate)
-	d.base_amount=d.account_currency==doc.default_currency?
-				(d.amount * (d.account_currency==doc.payment_currency?1:doc.conversion_rate)):
-				(d.amount * (d.account_currency==doc.payment_currency?1:doc.conversion_rate))*(doc.conversion_rate)
+        d.account_amount = d.amount * (d.account_currency == doc.currency ? 1 : doc.conversion_rate)
+        d.base_amount = d.account_currency == doc.default_currency ?
+            (d.amount * (d.account_currency == doc.currency ? 1 : doc.conversion_rate)) :
+            (d.amount * (d.account_currency == doc.currency ? 1 : doc.conversion_rate)) * (doc.conversion_rate)
 
-            if (!d.cost_center) {
-		if (doc.cost_center){
-	                d.cost_center = doc.cost_center
-		}
-		else{
-			frappe.throw(__("Please set Cost Center"));
-		}
+        if (!d.cost_center) {
+            if (doc.cost_center) {
+                d.cost_center = doc.cost_center
+            }
+            else {
+                frappe.throw(__("Please set Cost Center"));
+            }
 
+        }
+        if (!d.project) {
+            if (doc.project) {
+                d.project = doc.project
             }
-            if (!d.project) {
-		if (doc.project){
-	                d.project = doc.project
-		}
-            }
+        }
 
     });
-	cur_frm.refresh_field('expenses');
-	cur_frm.cscript.calculate_total(doc);
+    cur_frm.refresh_field('expenses');
+    cur_frm.cscript.calculate_total(doc);
 };
 
 cur_frm.cscript.calculate_total = function (doc) {
@@ -148,9 +148,10 @@ frappe.ui.form.on("Expense Entry", {
     setup: function (frm) {
         frm.trigger("set_query_for_cost_center");
         frm.add_fetch("company", "cost_center", "cost_center");
+        frm.set_df_property('myfield',  'hidden',  (frm.doc.currency == frm.doc.default_currency) ? 1 : 0);        
     },
 
-    onload: function (frm) {},
+    onload: function (frm) { },
 
     refresh: function (frm) {
         //frm.trigger("toggle_fields");
@@ -158,9 +159,10 @@ frappe.ui.form.on("Expense Entry", {
         if (frm.doc.docstatus === 1) {
             frm.add_custom_button(__('Accounting Ledger'), function () {
                 frappe.route_options = {
-                    voucher_no: frm.doc.name,
-                    company: frm.doc.company,
-                    group_by_voucher: false
+                    "voucher_no": frm.doc.name,
+                    "from_date": frm.doc.posting_date,
+                    "to_date": frm.doc.posting_date,
+                    "company": frm.doc.company
                 };
                 frappe.set_route("query-report", "General Ledger");
             }, __("View"));
@@ -177,67 +179,95 @@ frappe.ui.form.on("Expense Entry", {
             };
         };
     },
+    payment_account: function (frm) {
 
-    mode_of_payment: function (frm) {
+    },
+    currency: function (frm) {
+        if (frm.doc.currency == frm.doc.default_currency) {
+            frm.set_value("conversion_rate", 1);
+            frm.set_df_property('conversion_rate',  'hidden', 1);        
+        } else if (frm.doc.conversion_rate == 1 && frm.doc.currency != frm.doc.default_currency) {
+            frm.set_df_property('conversion_rate',  'hidden', 0);        
+            frappe.call({
+                method: "erpnext.setup.utils.get_exchange_rate",
+                args: {
+                    from_currency: frm.doc.currency,
+                    to_currency: frm.doc.default_currency,
+                    transaction_date: frm.doc.posting_date
+                },
+                callback: function (r, rt) {
+                    frm.set_value("conversion_rate", r.message);
+                }
+            })
+        }
+    },
+    type: function (frm) {
+        frm.set_value("party", "");
+        frm.set_value("payment_account", "");
+        frm.set_value("currency", "");       
+    },
+    party: function (frm) {
         if (!frm.doc.default_currency) {
-            frm.set_value("mode_of_payment", "");
+            frm.set_value("party", "");
             frm.set_value("payment_account", "");
-            frm.set_value("payment_currency", "");
+            frm.set_value("currency", "");
             frappe.msgprint(__("Please set Currency Company First"));
             this.frm.refresh_fields();
             return;
-
         }
-        frappe.call({
-            method: "pav.pav.doctype.expense_entry.expense_entry.get_payment_account",
-            args: {
-                "mode_of_payment": frm.doc.mode_of_payment,
-                "company": frm.doc.company
-            },
-            callback: function (r) {
-                if (r.message) {
-                    cur_frm.set_value("payment_account", r.message.account);
-                    frm.refresh_fields();
-                    cur_frm.refresh_field('payment_currency');
-                    //frm.trigger("currency");
-
-                    //
-
-                    console.log("hh")
-                    console.log(r.message.account_currency)
-                    if (r.message.account_currency == frm.doc.default_currency) {
-                        frm.set_value("conversion_rate", 1);
-                    } else if (frm.doc.conversion_rate == 1 && r.message.account_currency && frm.doc.default_currency) {
-                        frappe.call({
-                            method: "erpnext.setup.utils.get_exchange_rate",
-                            args: {
-                                from_currency: r.message.account_currency,
-                                to_currency: frm.doc.default_currency,
-                                transaction_date: frm.doc.posting_date
-                            },
-                            callback: function (r, rt) {
-                                frm.set_value("conversion_rate", r.message);
-                            }
-                        })
+        else if (frm.doc.party && frm.doc.type=='Mode of Payment') {            
+            frappe.call({
+                method: "pav.pav.doctype.expense_entry.expense_entry.get_payment_account",
+                args: {
+                    "mode_of_payment": frm.doc.party,
+                    "company": frm.doc.company
+                },
+                callback: function (r) {
+                    if (r.message) {
+                        cur_frm.set_value("payment_account", r.message.account);
+                        frm.refresh_fields();
+                        cur_frm.refresh_field('currency');
+                    } else {
+                        console.log("yyyyyyyy")
+                        frm.set_value("payment_account", "");
+                        frm.set_value("party", "");
+                        frm.refresh_fields();
+                        return;
                     }
-                    if (r.message.account_currency_currency && cur_frm.doc.default_currency) {
-                        var default_label = __(frappe.meta.docfield_map[cur_frm.doctype]["conversion_rate"].label);
-                        cur_frm.fields_dict.conversion_rate.set_label(default_label +
-                            repl(" (1 %(r.message.account_currency)s = [?] %(default_currency)s)", cur_frm.doc));
-                    }
-
-                } else {
+                }
+            });
+            console.log(frm.doc.payment_account)
+        }
+        else if (frm.doc.party && frm.doc.type=='Bank Account') {
+            frappe.db.get_value("Bank Account", {"name": frm.doc.party}, "account", function(value) {
+                if(value.account){
+                    frm.set_value("payment_account", value.account);
+                    cur_frm.refresh_field('payment_account');
+                }else{
                     console.log("yyyyyyyy")
                     frm.set_value("payment_account", "");
-                    frm.set_value("mode_of_payment", "");
+                    frm.set_value("party", "");
                     frm.refresh_fields();
                     return;
-                }
-                    frm.refresh_fields();
-
-            }
-        });
-        console.log(frm.doc.payment_account)
+                }                
+            })
+        }
+        else if (frm.doc.party && frm.doc.type=='Employee Account') {
+            frappe.db.get_value("Company", {"name": frm.doc.company}, "default_employee_payable_account_mc_pav", function(value) {
+				if (value.default_employee_payable_account_mc_pav){
+                    frappe.db.get_value("Employee Account", {"name": frm.doc.party}, "currency", function(emp_acc) {
+                        frappe.db.get_value("Account", {"parent_account": value.default_employee_payable_account_mc_pav,
+                                                    "account_currency":emp_acc.currency}, "name", function(acc) {
+                            frm.set_value("payment_account", acc.name);
+                            cur_frm.refresh_field('payment_account');
+                        });
+                    });                    					
+				}else{
+					frappe.msgprint(__("Please Set Default Employee Payable Account MC PAV in the Company"));
+				}
+            });
+            
+        }
     }
 
 });

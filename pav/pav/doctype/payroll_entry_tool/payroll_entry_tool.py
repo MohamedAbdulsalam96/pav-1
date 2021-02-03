@@ -130,7 +130,7 @@ class PayrollEntryTool(Document):
 			account_dict2 = {}
 			num=0
 			for ac in account_dict:
-				pa = frappe.db.sql("""select DISTINCT pa.name as project_activities, pa.project_dimension as project_dimension, pa.project as project, IFNULL(pap.project_percentage,0.0) as project_percentage
+				pa = frappe.db.sql("""select DISTINCT pa.name as project_activities, pa.project as project, IFNULL(pap.project_percentage,0.0) as project_percentage
 					from `tabProject Activities` pa 
 					LEFT JOIN `tabSalary Component` sc ON sc.name = '%(sc)s'
 					INNER JOIN `tabProject Activity Payroll` pap ON pap.parent = pa.name
@@ -149,7 +149,7 @@ class PayrollEntryTool(Document):
 						account_dict2[num]['amount']=flt(account_dict[ac].get('amount'))*flt(item.project_percentage)/100
 						account_dict2[num]['project_activities']=item.project_activities
 						account_dict2[num]['project']=item.project
-						account_dict2[num]['project_dimension']=item.project_dimension
+						
 						account_dict2[num]['cost_center']=self.cost_center
 						account_dict2[num]['customer']=frappe.db.get_value("Project",{"name": item.project}, "customer")
 
@@ -162,7 +162,7 @@ class PayrollEntryTool(Document):
 						account_dict2[num]['amount']=account_dict[ac].get('amount')*percentage_count/100
 						account_dict2[num]['project_activities']=self.project_activities
 						account_dict2[num]['project']=self.project
-						account_dict2[num]['project_dimension']=self.project_dimension
+						
 						account_dict2[num]['cost_center']=self.cost_center
 						account_dict2[num]['customer']=self.customer
 						num+=1
@@ -177,7 +177,7 @@ class PayrollEntryTool(Document):
 					account_dict2[num]['amount']=account_dict[ac].get('amount')
 					account_dict2[num]['project_activities']=self.project_activities
 					account_dict2[num]['project']=self.project
-					account_dict2[num]['project_dimension']=self.project_dimension
+					
 					account_dict2[num]['cost_center']=self.cost_center
 					account_dict2[num]['customer']=self.customer
 					num+=1
@@ -222,7 +222,7 @@ class PayrollEntryTool(Document):
 						"conversion_rate": 1 if scc else self.conversion_rate,
 						"cost_center": earnings[ear].get('cost_center',self.cost_center),
 						"project": earnings[ear].get('project',self.project),
-						"project_dimension": earnings[ear].get('project_dimension',self.project_dimension),
+						
 						"project_activities": earnings[ear].get('project_activities',self.project_activities),
 						"customer": earnings[ear].get('customer',self.customer)
 					})
@@ -239,7 +239,7 @@ class PayrollEntryTool(Document):
 					"party": data.employee,
 					"cost_center": self.cost_center,
 					"project": self.project,
-					"project_dimension": self.project_dimension,
+					
 					"project_activities": self.project_activities,
 					"customer": self.customer
 
@@ -267,7 +267,7 @@ class PayrollEntryTool(Document):
 					"party": ss[1],
 					"cost_center": self.cost_center,
 					"project": self.project,
-					"project_dimension": self.project_dimension,
+					
 					"project_activities": self.project_activities,
 					"customer": self.customer
 				})
@@ -286,7 +286,7 @@ class PayrollEntryTool(Document):
 						"conversion_rate": 1 if scc else self.conversion_rate,
 						"cost_center": self.cost_center,
 						"project": self.project,
-						"project_dimension": self.project_dimension,
+						
 						"project_activities": self.project_activities,
 						"customer": self.customer
 					})
@@ -303,7 +303,7 @@ class PayrollEntryTool(Document):
 				"conversion_rate": 1 if scc else self.conversion_rate,
 				"cost_center": self.cost_center,
 				"project": self.project,
-				"project_dimension": self.project_dimension,
+				
 				"project_activities": self.project_activities,
 				"customer": self.customer
 			})
@@ -318,7 +318,7 @@ class PayrollEntryTool(Document):
 				"conversion_rate": 1,
 				"cost_center": self.cost_center,
 				"project": self.project,
-				"project_dimension": self.project_dimension,
+				
 				"project_activities": self.project_activities,
 				"customer": self.customer
 			})
