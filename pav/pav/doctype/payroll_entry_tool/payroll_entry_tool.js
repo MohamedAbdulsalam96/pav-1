@@ -3,8 +3,7 @@
 
 frappe.ui.form.on('Payroll Entry Tool', {
 	setup: function(frm) {
-		frm.add_fetch("company", "cost_center", "cost_center");
-		frm.add_fetch("company", "sun_cost_center", "sun_cost_center");
+		frm.add_fetch("company", "cost_center", "cost_center");		
 		frm.add_fetch("company", "round_off_account", "round_off_account");
 		frm.add_fetch("company", "default_payroll_payable_account", "payroll_account");
 		frm.fields_dict['payroll_entry'].get_query = function () {
