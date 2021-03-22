@@ -92,6 +92,12 @@ def get_data():
 			"items": [
 				{
 					"type": "report",
+					"name": "Currency wise General Ledger",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Trial Balance for Party in Party Currency",
 					"doctype": "GL Entry",
 					"is_query_report": True

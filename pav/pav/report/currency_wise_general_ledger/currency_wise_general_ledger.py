@@ -161,9 +161,9 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 	presentation_currency = currency_info['presentation_currency']	
 
 	for entry in gl_entries:
-		frappe.msgprint("currency11111={0}".format(entry['account_currency']))		
+		#frappe.msgprint("currency11111={0}".format(entry['account_currency']))		
 		currency_list[entry['account_currency']]=entry['account_currency']
-		frappe.msgprint("currency={0}".format(entry['account_currency']))
+		#frappe.msgprint("currency={0}".format(entry['account_currency']))
 		debit_in_account_currency = flt(entry['debit_in_account_currency'])
 		credit_in_account_currency = flt(entry['credit_in_account_currency'])
 		account_currency = entry['account_currency']
@@ -176,7 +176,7 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 				entry['credit'] = credit_in_account_currency
 
 		converted_gl_list.append(entry)
-	frappe.msgprint("c===={0}".format(currency_list))
+	#frappe.msgprint("c===={0}".format(currency_list))
 	return converted_gl_list, currency_list
 
 
