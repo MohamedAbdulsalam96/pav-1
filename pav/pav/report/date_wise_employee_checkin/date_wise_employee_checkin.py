@@ -18,8 +18,9 @@ def execute(filters=None):
 			"dateonly": d[2],
 			"mintime": d[3],
 			"maxtime": d[4],
-			"delaytime": d[5],
-			"workinghours": d[6]
+			"delaytime": d[5] if d[8]<d[3] else None,
+			"earlyentry":d[6] if d[8]>d[3] else None,
+			"workinghours": d[7]
 		})
 	formatted_data.extend([{}])
 	return columns, formatted_data
@@ -59,10 +60,16 @@ def get_columns():
 		},
                 {
 			"fieldname": "delaytime",
-			"label": _("Delay"),
+			"label": _("Delay -"),
 			"fieldtype": "Data",
 			"width": 70
 		},
+		 {
+			"fieldname": "earlyentry",
+			"label": _("Early +"),
+			"fieldtype": "Data",
+			"width": 70
+		 },
                 {
 			"fieldname": "workinghours",
 			"label": _("Working hours"),
@@ -88,10 +95,14 @@ def get_data(filters):
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as mintime,
 		(select TIME(MAX(l.time)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as maxtime,
-		(select TIMEDIFF(time,shift_start) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
+		(select TIMEDIFF(time,shift_start)  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as delaytime,
+		(select TIMEDIFF(shift_start,time)  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
+			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as earlyentry,
 		(select TIMEDIFF(maxtime,mintime) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as workinghour
+			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as workinghour,
+		(select TIME(MIN(l.shift_start)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
+			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as shift_start
 		FROM `tabEmployee Checkin` em
 		{conditions} GROUP BY dateonly, employee
 		""".format(
