@@ -10,6 +10,7 @@ app_icon = "octicon octicon-file-directory"
 app_color = "grey"
 app_email = "a.kuhlani@partner-cons.com"
 app_license = "MIT"
+fixtures = ["Custom Field"]
 
 # Includes in <head>
 # ------------------

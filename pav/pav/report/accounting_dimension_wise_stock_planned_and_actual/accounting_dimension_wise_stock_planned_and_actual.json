@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2021-04-02 13:36:15.450765",
+ "modified": "2021-04-07 02:21:26.119686",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Accounting Dimension wise Stock Planned and Actual",
@@ -16,5 +16,12 @@
  "ref_doctype": "Stock Ledger Entry",
  "report_name": "Accounting Dimension wise Stock Planned and Actual",
  "report_type": "Script Report",
- "roles": []
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Stock Manager"
+  }
+ ]
 }
