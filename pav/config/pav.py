@@ -120,6 +120,18 @@ def get_data():
 					"doctype": "Salary Slip",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Accounting Dimension Balance",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Accounting Dimension wise Stock Planned and Actual",
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},
 			]
 		},
 

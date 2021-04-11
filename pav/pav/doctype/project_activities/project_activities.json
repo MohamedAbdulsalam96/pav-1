@@ -8,6 +8,7 @@
  "field_order": [
   "naming_series",
   "project_activity",
+  "project_activities_name",
   "project",
   "customer",
   "parent_project_activities",
@@ -15,6 +16,7 @@
   "column_break_4",
   "project_activity_code",
   "is_group",
+  "status",
   "disabled",
   "more_information_section_section",
   "description",
@@ -143,10 +145,21 @@
    "label": "Funder",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "fieldname": "project_activities_name",
+   "fieldtype": "Data",
+   "label": "Project Activities Name"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nOpen\nWorking\nCompleted\nCancelled"
   }
  ],
  "is_tree": 1,
- "modified": "2020-12-13 19:14:51.791784",
+ "modified": "2021-04-09 22:44:59.105759",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Project Activities",

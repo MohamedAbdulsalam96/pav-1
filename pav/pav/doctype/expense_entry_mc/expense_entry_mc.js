@@ -89,6 +89,30 @@ frappe.ui.form.on('Expense Entry MC', {
 			//frm.set_value("title", frm.doc.user_remark);
 		}
 		if (frm.doc.docstatus === 1) {
+			if (frm.doc.jv_created==0 && frm.doc.docstatus === 1 && frm.doc.status=='Approved') {
+				frm.add_custom_button(__('Journal Entry'), function () {
+					return frappe.call({
+						doc: frm.doc,
+						method: 'make_accrual_jv_entry',
+						args: {
+							
+						},
+						callback: function (r) {
+							var doclist = frappe.model.sync(r.message);
+							frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+						}
+					});
+				}, __("Create"));
+			}
+			if (frm.doc.jv_created==1){
+				frm.add_custom_button(__('Journal Entry'), function () {					
+					frappe.route_options = {
+						reference_type: frm.doc.doctype,
+						reference_name: frm.doc.name
+					};
+					frappe.set_route("List", "Journal Entry");
+				}, __("View"));
+			}
 			frm.add_custom_button(__('Accounting Ledger'), function () {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
@@ -99,16 +123,6 @@ frappe.ui.form.on('Expense Entry MC', {
 					presentation_currency: frm.doc.currency
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, __("View"));
-			frm.add_custom_button(__('Custom Accounting Ledger'), function () {
-				frappe.route_options = {
-					voucher_no: frm.doc.name,
-					from_date: frm.doc.posting_date,
-					to_date: frm.doc.posting_date,
-					company: frm.doc.company,
-					group_by: ''
-				};
-				frappe.set_route("query-report", "Custom General Ledger");
 			}, __("View"));
 		}
 	},

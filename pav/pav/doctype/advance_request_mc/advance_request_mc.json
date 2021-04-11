@@ -39,9 +39,7 @@
   "amended_from",
   "workflow_track_section_section",
   "workflow_track",
-  "reference_section_section",
-  "reference_type",
-  "reference_name"
+  "jv_created"
  ],
  "fields": [
   {
@@ -272,30 +270,17 @@
    "options": "WorkFlow Track"
   },
   {
-   "fieldname": "reference_section_section",
-   "fieldtype": "Section Break",
-   "label": "Reference Section"
-  },
-  {
    "allow_on_submit": 1,
-   "fieldname": "reference_type",
-   "fieldtype": "Select",
-   "label": "Reference Type",
-   "no_copy": 1,
-   "options": "\nJournal Entry\nPayment Entry",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "reference_name",
-   "fieldtype": "Data",
-   "label": "Reference Name",
+   "default": "0",
+   "fieldname": "jv_created",
+   "fieldtype": "Check",
+   "label": "JV Created",
    "no_copy": 1,
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-04-03 04:35:21.444000",
+ "modified": "2021-04-06 22:33:39.707197",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Advance Request MC",
@@ -325,7 +310,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "employee",

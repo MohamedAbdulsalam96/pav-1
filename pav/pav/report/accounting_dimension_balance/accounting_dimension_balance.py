@@ -76,6 +76,8 @@ def get_dimension_target_details(dimensions,filters):
 	if dimensions:
 		cond += """ and b.{budget_against} in (%s)""".format(
 			budget_against=budget_against) % ", ".join(["%s"] * len(dimensions))
+		if filters.root_type:
+			cond+= " and acc.root_type =  '{0}' ".format(filters.root_type)
 
 	return frappe.db.sql(
 		"""
@@ -86,7 +88,8 @@ def get_dimension_target_details(dimensions,filters):
 				sum(b.credit) as credit
 			from
 				`tabGL Entry` b	 
-				INNER JOIN `tab{budget_against_label}` bal on b.{budget_against}=bal.name
+			INNER JOIN `tab{budget_against_label}` bal on b.{budget_against}=bal.name
+			INNER JOIN `tabAccount` acc on b.account=acc.name 
 			where				
 				b.company = %s 
 				and b.posting_date between %s and %s 

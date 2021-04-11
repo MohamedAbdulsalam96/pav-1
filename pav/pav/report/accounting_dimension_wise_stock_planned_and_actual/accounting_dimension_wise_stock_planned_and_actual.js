@@ -70,7 +70,23 @@ frappe.query_reports["Accounting Dimension wise Stock Planned and Actual"] = {
 				return frappe.db.get_link_options(budget_against, txt);
 			}
 		}
-	]
+	],
+	"formatter": function (value, row, column, data, default_formatter) {
+		//value = $(`<span style='font-weight:bold'>${value}</span>`);
+		value = default_formatter(value, row, column, data);
+		
+		if (column.fieldname == "variance_qty" && data && data.variance_qty == 0) {
+			value = "<span style='color:blue'>" + value + "</span>";
+		}
+		else if (column.fieldname == "variance_qty" && data && data.variance_qty > 0) {
+			value = "<span style='color:green'>" + value + "</span>";
+		}else if (column.fieldname == "variance_qty" && data && data.variance_qty < 0) {
+			value = "<span style='color:red'>" + value + "</span>";
+		}
+
+		return value;
+	}
+
 };
 erpnext.dimension_filters.forEach((dimension) => {
 	frappe.query_reports["Accounting Dimension wise Stock Planned and Actual"].filters[4].options.push(dimension["document_type"]);

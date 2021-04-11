@@ -69,6 +69,13 @@ frappe.query_reports["Accounting Dimension Balance"] = {
 
 				return frappe.db.get_link_options(budget_against, txt);
 			}
+		},
+		{
+			fieldname: "root_type",
+			label: __("Root Type"),
+			fieldtype: "Select",
+			options: ["", "Asset", "Liability", "Income", "Expense"],
+			default: "Expense",			
 		}
 	]
 };

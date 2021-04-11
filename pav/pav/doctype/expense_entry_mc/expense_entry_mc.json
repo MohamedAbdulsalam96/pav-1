@@ -46,7 +46,8 @@
   "same_amount",
   "party_account_section_section",
   "party_bank_account",
-  "amended_from"
+  "amended_from",
+  "jv_created"
  ],
  "fields": [
   {
@@ -187,8 +188,7 @@
    "fieldname": "payment_account",
    "fieldtype": "Link",
    "label": "Payment Account",
-   "options": "Account",
-   "read_only": 1
+   "options": "Account"
   },
   {
    "fieldname": "payment_account_balance",
@@ -333,10 +333,19 @@
    "label": "Party Bank Account",
    "options": "Bank Account",
    "permlevel": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "jv_created",
+   "fieldtype": "Check",
+   "label": "JV Created",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-01-10 11:25:35.975076",
+ "modified": "2021-04-06 22:33:50.101595",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Expense Entry MC",

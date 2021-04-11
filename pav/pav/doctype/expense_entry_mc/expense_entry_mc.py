@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, money_in_words
+from frappe.utils import flt, money_in_words, nowdate
 from frappe.model.document import Document
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.party import get_party_account
@@ -25,13 +25,13 @@ class ExpenseEntryMC(AccountsController):
 		self.validate_accounts()
 		self.validate_amount()
 		self.validate_status()
-		if self.status=='Approved':
-			self.make_gl_entries()
-		if not self.currency:
-			frappe.throw(_("""Currency is Mandatory"""))
+		#if self.status=='Approved':
+		#	self.make_gl_entries()
+		#if not self.currency:
+		#	frappe.throw(_("""Currency is Mandatory"""))
 
 	def on_cancel(self):
-		self.make_gl_entries(cancel=True)
+		#self.make_gl_entries(cancel=True)
 		self.status=='Cancelled'
 
 	def make_gl_entries(self, cancel=False):
@@ -127,6 +127,117 @@ class ExpenseEntryMC(AccountsController):
 			)
 		return gl_entry
 
+	def make_accrual_jv_entry(self):
+		journal_entry = frappe.new_doc('Journal Entry')
+		
+		journal_entry.voucher_type = 'Journal Entry'
+		journal_entry.user_remark = self.user_remark		
+		journal_entry.cheque_date = self.posting_date
+		journal_entry.cheque_no = self.name
+		journal_entry.company = self.company
+		journal_entry.posting_date = nowdate()
+		journal_entry.multi_currency=1
+		accounts = []
+
+		against_acc = []
+		party=None
+		party_type=None
+		account=self.payment_account
+		if self.type=='Employee':
+			party=frappe.db.get_value("Employee Account",{"employee": self.employee,"currency":self.currency}, "name")
+			party_type='Employee Account'
+			account=frappe.db.get_value("Account",{"parent_account": self.payment_account,"account_currency":self.currency}, "name")
+		elif self.type=='Supplier':
+			party=self.supplier
+			party_type='Supplier'
+		
+		for data in self.expenses:
+			expense_account_p=frappe.db.get_value("Expense Type Account MC",{"parent": data.expense_type,"company":self.company}, "default_account")
+			if expense_account_p:
+				expense_account=frappe.db.get_value("Account",{"parent_account": expense_account_p,"account_currency":self.currency}, "name")
+				if expense_account:
+					if expense_account not in against_acc:
+						against_acc.append(expense_account)
+					accounts.append({				
+						"account": expense_account,
+						"account_currency": self.currency,
+						"debit": data.base_amount,
+						"debit_in_account_currency": data.amount,
+						"conversion_rate":self.conversion_rate,
+						"against": account,
+						"cost_center": data.cost_center,
+						"project": data.project,
+						"remarks": data.description,
+						"reference_type":self.doctype,
+						"reference_name":self.name
+					})
+				else:frappe.throw(_("""{0} Account Must to have Child with {1} Currency""").format(expense_account_p,self.currency))
+			else:frappe.throw(_("""Account of {0} Expense Type is Missing""").format(data.expense_type))
+		accounts.append({				
+			"account": account,
+			"account_currency": self.currency,
+			"credit": self.base_amount,
+			"credit_in_account_currency": self.amount,
+			"conversion_rate":self.conversion_rate,
+			"against": ','.join(against_acc),
+			"party_type": party_type,
+			"party": party,
+			"cost_center": self.cost_center,
+			"project": self.project,
+			"against_voucher_type": self.doctype,
+			"against_voucher": self.name,
+			"remarks": self.user_remark,
+			"reference_type":self.doctype,
+			"reference_name":self.name
+		})
+		if self.is_paid and (self.type=='Employee' or self.type=='Supplier'):
+			accounts.append({				
+				"account": account,
+				"account_currency": self.currency,
+				"debit": self.paid_base_amount,
+				"debit_in_account_currency": self.paid_amount,
+				"conversion_rate":self.conversion_rate,
+				"against": self.from_account,
+				"party_type": party_type,
+				"party": party,
+				"against_voucher_type": self.doctype,
+				"against_voucher": self.name,
+				"remarks": self.user_remark,
+				"cost_center": self.cost_center,
+				"reference_type":self.doctype,
+				"reference_name":self.name
+			})
+			accounts.append({				
+				"account": self.from_account,
+				"account_currency": self.currency,
+				"credit": self.paid_base_amount,
+				"credit_in_account_currency": self.paid_amount,
+				"conversion_rate":self.conversion_rate,
+				"against": party,
+				"remarks": self.user_remark,
+				"cost_center": self.cost_center,
+				"reference_type":self.doctype,
+				"reference_name":self.name
+			})
+		##
+		
+		
+		##
+		journal_entry.set("accounts", accounts)
+		journal_entry.title = self.title
+		try:
+			journal_entry.save()
+		except Exception as e:
+			frappe.msgprint(e)
+				
+		self.jv_created=1
+		self.save()
+		frappe.msgprint(_("Journal Entry Created for Currenct Document {0} ")
+			.format(journal_entry.name))
+		
+		self.reload()
+		return journal_entry
+	
 	def validate_accounts(self):
 		if not self.payment_account:
 			frappe.throw(_("""Payment Account is Mandatory"""))

@@ -23,9 +23,6 @@ class AdvanceRequestMC(AccountsController):
 		self.validate_accounts()
 		self.validate_amount()
 		self.validate_status()
-		#if self.status=='Approved':
-			#self.make_accrual_jv_entry()
-			##self.make_gl_entries()
 	
 	def on_update(self):
 		self.amount_in_words=money_in_words(self.amount, self.currency)
@@ -120,11 +117,11 @@ class AdvanceRequestMC(AccountsController):
 
 	def make_accrual_jv_entry(self):
 		journal_entry = frappe.new_doc('Journal Entry')
-		self.reference_type='Journal Entry'
+		
 		journal_entry.voucher_type = 'Journal Entry'
-		journal_entry.user_remark = self.user_remark
-		journal_entry.cheque_no = self.name
+		journal_entry.user_remark = self.user_remark		
 		journal_entry.cheque_date = self.posting_date
+		journal_entry.cheque_no = self.name
 		journal_entry.company = self.company
 		journal_entry.posting_date = nowdate()
 		journal_entry.multi_currency=1
@@ -143,7 +140,9 @@ class AdvanceRequestMC(AccountsController):
 				"against_voucher_type": self.doctype,
 				"against_voucher": self.name,
 				"remarks": self.user_remark,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"reference_type":self.doctype,
+				"reference_name":self.name
 			})
 			accounts.append({				
 				"account": self.from_account,
@@ -153,7 +152,9 @@ class AdvanceRequestMC(AccountsController):
 				"conversion_rate":self.conversion_rate,
 				"against": self.payment_account if self.type!='Employee' else frappe.db.get_value("Account",{"parent_account": self.payment_account,"account_currency":self.currency}, "name"),
 				"remarks": self.user_remark,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"reference_type":self.doctype,
+				"reference_name":self.name
 			})
 		else:
 			party_type=''
@@ -164,12 +165,7 @@ class AdvanceRequestMC(AccountsController):
 			elif self.type=='Supplier':
 				frappe.msgprint("test")
 				party_type==self.type
-				##frappe.msgprint("{0}".format(self.type))
-				##frappe.msgprint("party_type={0}".format(party_type))
 				party=self.supplier
-			##frappe.msgprint("{0}-{1}".format(party_type,party))
-			##frappe.msgprint("{0}-{1}".format(self.type,self.supplier))
-			##frappe.msgprint("{0}".format(self))
 			accounts.append({				
 				"account": self.payment_account if self.type!='Employee' else frappe.db.get_value("Account",{"parent_account": self.payment_account,"account_currency":self.currency}, "name"),
 				"account_currency": self.currency,
@@ -180,7 +176,9 @@ class AdvanceRequestMC(AccountsController):
 				"party_type": 'Supplier' if self.type=='Supplier' else ('Employee Account' if self.type=='Employee' else ''),
 				"party": party ,
 				"remarks": self.user_remark,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"reference_type":self.doctype,
+				"reference_name":self.name
 			})
 			accounts.append({				
 				"account": self.from_account,
@@ -190,23 +188,21 @@ class AdvanceRequestMC(AccountsController):
 				"conversion_rate":self.conversion_rate,
 				"against": self.payment_account if self.type!='Employee' else frappe.db.get_value("Account",{"parent_account": self.payment_account,"account_currency":self.currency}, "name"),
 				"remarks": self.user_remark,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"reference_type":self.doctype,
+				"reference_name":self.name
 			})
 		##
 		journal_entry.set("accounts", accounts)
 		journal_entry.title = self.purpose
-		journal_entry.save()
-		
-		self.reference_name=journal_entry.name
-		#self.accrual_jv=journal_entry.name
-		self.save()
 		try:
-			#journal_entry.submit()
-			jv_name = journal_entry.name			
+			journal_entry.save()
 		except Exception as e:
 			frappe.msgprint(e)
-
-		frappe.msgprint(_("Journal Entry submitted for Currenct Document {0} ")
+				
+		self.jv_created=1
+		self.save()
+		frappe.msgprint(_("Journal Entry Created for Currenct Document {0} ")
 			.format(journal_entry.name))
 		
 		self.reload()
