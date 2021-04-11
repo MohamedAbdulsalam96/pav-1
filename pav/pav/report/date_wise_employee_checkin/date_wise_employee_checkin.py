@@ -18,8 +18,8 @@ def execute(filters=None):
 			"dateonly": d[2],
 			"mintime": d[3],
 			"maxtime": d[4],
-			"delaytime": d[5] if d[8]<d[3] else None,
-			"earlyentry":d[6] if d[8]>d[3] else None,
+			"delaytime": (d[5] if (d[8]<d[3]) else None) if d[8] else None,
+			"earlyentry":(d[6] if (d[8]>d[3]) else None) if d[8] else None,
 			"workinghours": d[7]
 		})
 	formatted_data.extend([{}])
@@ -95,9 +95,9 @@ def get_data(filters):
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as mintime,
 		(select TIME(MAX(l.time)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as maxtime,
-		(select TIMEDIFF(time,shift_start)  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
+		(select TIMEDIFF(MIN(l.time),shift_start)  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as delaytime,
-		(select TIMEDIFF(shift_start,time)  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
+		(select TIMEDIFF(shift_start,MIN(l.time))  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as earlyentry,
 		(select TIMEDIFF(maxtime,mintime) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as workinghour,
