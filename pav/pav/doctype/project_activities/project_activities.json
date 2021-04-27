@@ -38,6 +38,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Project",
    "options": "Project",
    "reqd": 1
@@ -159,7 +160,7 @@
   }
  ],
  "is_tree": 1,
- "modified": "2021-04-09 22:44:59.105759",
+ "modified": "2021-04-11 18:12:16.158906",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Project Activities",
