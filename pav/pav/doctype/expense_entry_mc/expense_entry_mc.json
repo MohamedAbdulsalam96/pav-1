@@ -12,12 +12,20 @@
   "bank_account",
   "employee",
   "employee_name",
+  "supplier",
+  "supplier_name",
   "currency",
   "conversion_rate",
+  "is_paid",
   "column_break_9",
   "posting_date",
   "company",
   "status",
+  "accounting_dimensions_section",
+  "cost_center",
+  "column_break_19",
+  "project",
+  "task",
   "detail_section_section",
   "expenses",
   "approved_section_section",
@@ -27,11 +35,19 @@
   "base_amount",
   "payment_account",
   "payment_account_balance",
-  "accounting_dimensions_section",
-  "cost_center",
-  "project",
-  "task",
-  "amended_from"
+  "payment_section_section",
+  "from_mode_of_payment",
+  "from_bank_account",
+  "column_break_32",
+  "from_account",
+  "paid_amount",
+  "paid_amount_in_words",
+  "paid_base_amount",
+  "same_amount",
+  "party_account_section_section",
+  "party_bank_account",
+  "amended_from",
+  "jv_created"
  ],
  "fields": [
   {
@@ -46,7 +62,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Type",
-   "options": "Mode of Payment\nBank Account\nEmployee"
+   "options": "Mode of Payment\nBank Account\nEmployee\nSupplier"
   },
   {
    "depends_on": "eval:doc.type=='Mode of Payment'",
@@ -66,12 +82,14 @@
    "depends_on": "eval:(doc.type=='Employee')",
    "fieldname": "employee",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee"
   },
   {
+   "depends_on": "eval:(doc.type=='Employee')",
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
@@ -134,8 +152,7 @@
    "in_list_view": 1,
    "label": "Amount",
    "options": "currency",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "base_amount",
@@ -171,8 +188,7 @@
    "fieldname": "payment_account",
    "fieldtype": "Link",
    "label": "Payment Account",
-   "options": "Account",
-   "read_only": 1
+   "options": "Account"
   },
   {
    "fieldname": "payment_account_balance",
@@ -200,15 +216,17 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "user_remark",
    "fieldtype": "Small Text",
-   "label": "User Remark",
-   "reqd": 1
+   "label": "User Remark"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
-   "label": "Title"
+   "label": "Title",
+   "no_copy": 1
   },
   {
    "fieldname": "approved_section_section",
@@ -220,10 +238,114 @@
    "fieldtype": "Table",
    "label": "Expense Entry Detail MC",
    "options": "Expense Entry Detail MC"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(doc.type=='Employee')",
+   "fieldname": "is_paid",
+   "fieldtype": "Check",
+   "label": "Is Paid"
+  },
+  {
+   "depends_on": "is_paid",
+   "fieldname": "payment_section_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Section"
+  },
+  {
+   "fieldname": "from_mode_of_payment",
+   "fieldtype": "Link",
+   "label": "From Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "from_bank_account",
+   "fieldtype": "Link",
+   "label": "From Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_account",
+   "fieldtype": "Link",
+   "label": "From Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:(doc.type=='Supplier')",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:(doc.type=='Supplier')",
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "paid_amount_in_words",
+   "fieldtype": "Small Text",
+   "label": "Paid Amount in Words",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "paid_base_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Base Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "same_amount",
+   "fieldtype": "Check",
+   "label": "Same Amount"
+  },
+  {
+   "fieldname": "party_account_section_section",
+   "fieldtype": "Section Break",
+   "label": "Party Account Section"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "party_bank_account",
+   "fieldtype": "Link",
+   "label": "Party Bank Account",
+   "options": "Bank Account",
+   "permlevel": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "jv_created",
+   "fieldtype": "Check",
+   "label": "JV Created",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-11-11 11:14:52.633247",
+ "modified": "2021-04-06 22:33:50.101595",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Expense Entry MC",

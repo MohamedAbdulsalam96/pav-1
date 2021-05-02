@@ -1,0 +1,34 @@
+{
+ "add_total_row": 0,
+ "creation": "2021-04-06 10:54:03.911164",
+ "disable_prepared_report": 1,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "Partner",
+ "modified": "2021-04-06 10:54:03.911164",
+ "modified_by": "Administrator",
+ "module": "PAV",
+ "name": "Employee Leave and Attendance Status Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Leave Application",
+ "report_name": "Employee Leave and Attendance Status Report ",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "All"
+  }
+ ]
+}

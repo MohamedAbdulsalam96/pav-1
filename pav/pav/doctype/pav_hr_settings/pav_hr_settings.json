@@ -7,7 +7,9 @@
   "enable_auto_approve_leave",
   "from_workflow_state",
   "to_workflow_state",
-  "period"
+  "period",
+  "section_break_5",
+  "enable_two_period_in_ecr"
  ],
  "fields": [
   {
@@ -32,10 +34,20 @@
    "fieldname": "period",
    "fieldtype": "Int",
    "label": "Period"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_two_period_in_ecr",
+   "fieldtype": "Check",
+   "label": "Enable Two Period in ECR"
   }
  ],
  "issingle": 1,
- "modified": "2020-12-23 13:32:43.202258",
+ "modified": "2021-04-06 14:11:18.433520",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "PAV HR Settings",
