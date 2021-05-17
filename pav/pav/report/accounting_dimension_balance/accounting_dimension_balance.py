@@ -20,15 +20,8 @@ def execute(filters=None):
 	balances = get_opening_balances(dimensions,filters)	
 	#frappe.msgprint("{0}".format(dimension_target_details))
 	for ccd in dimension_target_details:
-		if ccd.debit>ccd.credit:
-			debit=ccd.debit-ccd.credit
-			credit=0.0
-		elif ccd.debit<ccd.credit:
-			debit=0.0
-			credit=ccd.credit-ccd.debit
-		else:
-			debit=0.0
-			credit=0.0
+		debit = ccd.debit
+		credit = ccd.credit
 		
 		opening_credit = 0
 		opening_debit = 0
@@ -36,40 +29,27 @@ def execute(filters=None):
 			if b.budget_against == ccd.budget_against:
 				opening_credit = b.credit
 				opening_debit = b.debit
+				opening_debit, opening_credit = toggle_debit_credit(opening_debit, opening_credit)
 		
-		if opening_debit>opening_credit:
-			opening_debit=opening_debit-opening_credit
-			opening_credit=0
-			dor=1
-		elif opening_debit<opening_credit:
-			opening_debit=0
-			opening_credit=opening_credit-opening_debit						
-			dor=0
-		else:
-			opening_debit=0
-			opening_credit=0
-			dor=2
-		if dor==1:
-			closing=(debit+credit)+(opening_debit)
-		else:
-			closing=(debit+credit)-(opening_debit)
-		if closing>0:
-			debit=closing
-			credit=0.0
-		elif closing<0:
-			debit=0.0
-			credit=closing
-		else:
-			debit=0.0
-			credit=0.0
+		closing_debit, closing_credit = toggle_debit_credit(opening_debit + debit, opening_credit + credit)
 
-		if filters.get("budget_against")=="Task":
-			data.append([ccd.budget_against, ccd.budget_against_name, ccd.project, opening_debit, opening_credit, ccd.debit, ccd.credit, debit, credit])			
+		if filters.get("budget_against")=="Task" or filters.budget_against == "Property":
+			data.append([ccd.budget_against, ccd.budget_against_name, ccd.project, opening_debit, opening_credit, debit, credit, closing_debit, closing_credit])			
 		else:
-			data.append([ccd.budget_against, ccd.budget_against_name, opening_debit, opening_credit, ccd.debit, ccd.credit, debit, credit])
+			data.append([ccd.budget_against, ccd.budget_against_name, opening_debit, opening_credit, debit, credit, closing_debit, closing_credit])
 
 	
 	return columns, data
+
+def toggle_debit_credit(debit, credit):
+	if flt(debit) > flt(credit):
+		debit = flt(debit) - flt(credit)
+		credit = 0.0
+	else:
+		credit = flt(credit) - flt(debit)
+		debit = 0.0
+
+	return debit, credit
 
 def get_columns(filters):
 	columns = [
@@ -80,7 +60,7 @@ def get_columns(filters):
 		columns.append(_("Project") + ":Link/Project:100")		
 	else:
 		columns.append(_(filters.get("budget_against")+" Name") + ":Data:200")
-	columns.append("Opening (Dr)):Currency:120")
+	columns.append("Opening (Dr):Currency:120")
 	columns.append("Opening (Cr):Currency:120")
 	columns.append("Debit:Currency:120")
 	columns.append("Credit:Currency:120")
@@ -118,23 +98,35 @@ def get_dimension_target_details(dimensions,filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cond = ""
 	col = """ bal.{budget_against}_name """
-	if filters.budget_against == "Task" and filters.get('project'):
-	 	cond += """and bal.project = %s""" % (frappe.db.escape(filters.get('project')))
+	if ((filters.budget_against == "Task" or filters.budget_against == "Property" ) and filters.get('project')):
+		cond += """and bal.project = %s""" % (frappe.db.escape(filters.get('project')))
 
 	if filters.budget_against == "Task":
 		col= """ bal.project as project, bal.subject """
 	else:
 		col= """ bal.{budget_against}_name """
 		col = """ bal.%s_name """ % (budget_against)
-	if filters.get('account'):
-		cond += """and acc.name = %s""" % (frappe.db.escape(filters.get('account')))
 
 	if dimensions:
 		cond += """ and b.{budget_against} in (%s)""".format(
 			budget_against=budget_against) % ", ".join(["%s"] * len(dimensions))
-		if filters.root_type:
+	
+	if filters.root_type:
+		if filters.get("account"):
+			lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
+			cond += """and account in (select name from tabAccount
+			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt)
+		else:
 			cond+= " and acc.root_type in (%s)" % ( ", ".join(["%s"] * len(filters.root_type)))
-			dimensions += filters.root_type
+			if not dimensions:
+				dimensions = filters.root_type
+			else:
+				dimensions += filters.root_type
+	else:
+		if filters.get("account"):
+			lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
+			cond += """and account in (select name from tabAccount
+			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt)
 
 	return frappe.db.sql(
 		"""
@@ -171,23 +163,43 @@ def get_dimension_target_details(dimensions,filters):
 def get_opening_balances(dimensions,filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cond = ""
-	if filters.budget_against == "Task" and filters.get('project'):
-	 	cond += """and bal.project = %s""" % (frappe.db.escape(filters.get('project')))
+	col = """ bal.{budget_against}_name """
 
-	if filters.get('account'):
-		cond += """and acc.name = %s""" % (frappe.db.escape(filters.get('account')))
+	if ((filters.budget_against == "Task" or filters.budget_against == "Property" ) and filters.get('project')):
+		cond += """and bal.project = %s""" % (frappe.db.escape(filters.get('project')))
+
+	if filters.budget_against == "Task":
+		col= """ bal.project as project, bal.subject """
+	else:
+		col= """ bal.{budget_against}_name """
+		col = """ bal.%s_name """ % (budget_against)
 
 	if dimensions:
 		cond += """ and b.{budget_against} in (%s)""".format(
 			budget_against=budget_against) % ", ".join(["%s"] * len(dimensions))
-		if filters.root_type:
+	
+	if filters.root_type:
+		if filters.get("account"):
+			lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
+			cond += """and account in (select name from tabAccount
+			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt)
+		else:
 			cond+= " and acc.root_type in (%s)" % ( ", ".join(["%s"] * len(filters.root_type)))
-			dimensions += filters.root_type
+			if not dimensions:
+				dimensions = filters.root_type
+			else:
+				dimensions += filters.root_type
+	else:
+		if filters.get("account"):
+			lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
+			cond += """and account in (select name from tabAccount
+			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt)
 
 	return frappe.db.sql(
 		"""
 			select
-				b.{budget_against} as budget_against,				
+				b.{budget_against} as budget_against,
+				{col} as budget_against_name,
 				sum(b.debit) as debit,
 				sum(b.credit) as credit
 			from
@@ -204,6 +216,7 @@ def get_opening_balances(dimensions,filters):
 			budget_against_label=filters.budget_against,
 			budget_against=budget_against,
 			cond=cond,
+			col=col
 		),
 		tuple(
 			[

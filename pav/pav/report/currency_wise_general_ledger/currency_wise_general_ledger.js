@@ -117,7 +117,7 @@ frappe.query_reports["Currency wise General Ledger"] = {
 			"fieldtype": "Select",
 			"options": ["", __("Group by Voucher"), __("Group by Voucher (Consolidated)"),
 				__("Group by Account"), __("Group by Party")],
-			"default": __("Group by Voucher (Consolidated)")
+			"default": __("Group by Account")
 		},
 		{
 			"fieldname":"tax_id",
@@ -162,7 +162,7 @@ frappe.query_reports["Currency wise General Ledger"] = {
 }
 
 erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["General Ledger"].filters.splice(15, 0 ,{
+	frappe.query_reports["Currency wise General Ledger"].filters.splice(15, 0 ,{
 		"fieldname": dimension["fieldname"],
 		"label": __(dimension["label"]),
 		"fieldtype": "Link",
