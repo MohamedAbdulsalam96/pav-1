@@ -36,6 +36,12 @@ frappe.query_reports["Employee Leave and Attendance Status Report"] = {
 			"label": __("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee",
+		},
+		{
+			"fieldname":"branch",
+			"label": __("Branch"),
+			"fieldtype": "Link",
+			"options": "Branch",
 		}
 	]
 }

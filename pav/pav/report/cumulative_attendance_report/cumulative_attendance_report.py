@@ -8,7 +8,7 @@ from frappe.utils import (flt,cstr)
 from datetime import datetime,timedelta,time
 
 def delay(max, min):
-	return max - min if max and min and max > min else None
+	return max - min if max and min and max > min else timedelta(00,00,00)
 
 def delayTotal(max, min):
 	if max and min:
@@ -17,6 +17,8 @@ def delayTotal(max, min):
 		return max
 	elif min and not max:
 		return min 
+	else:
+		timedelta(00,00,00)
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -25,9 +27,9 @@ def execute(filters=None):
 	data = get_data(filters)
 
 	t= timedelta(00,00,00)
-	#dd= timedelta(hours=t.hours,minutes=t.minutes)
+	#dd= timedelta(hours=t.hours,minutes=t.minutes)\
+	empList = []
 	for d in data:
-			
 			startLate = delay(d[3], d[5])
 			endLate = delay(d[6], d[4])
 			tLate = delayTotal(startLate, endLate)
@@ -35,25 +37,52 @@ def execute(filters=None):
 			startEr = delay(d[5], d[3])
 			endEr = delay(d[4], d[6])
 			tEr = delayTotal(startEr, endEr)
+			tHours=d[4] - d[3] if d[4] and d[3] and d[4] > d[3] else timedelta(00,00,00)
+			if empList:
+				chk = False
+				for e in empList:
+					if e[0] == d[0]:
+						chk = True
+						
+						e[5] = delayTotal(e[5], startLate)
+						e[6] =  delayTotal(e[6], endLate)
+						e[7] =  delayTotal(e[7], tLate)
+						e[8] =  delayTotal(e[8], startEr)
+						e[9] =  delayTotal(e[9], endEr)
+						e[10] = delayTotal(e[10], tEr)
+						e[11] = delayTotal(e[11], tHours)
+				if not chk:
+					empList.append([d[0], d[1], d[2], d[3], d[4], startLate, endLate, tLate, startEr, endEr, tEr, tHours])
+			else:
+				empList.append([d[0], d[1], d[2], d[3], d[4], startLate, endLate, tLate, startEr, endEr, tEr, tHours])
 
-			tHours = d[4] - d[3] if d[4] and d[3] and d[4] > d[3] else timedelta(00,00,00)
+	for d in empList:
 			formatted_data.append({
 			"emponly": d[0],
 			"empname": d[1],
 			"dateonly": d[2],
 			"mintime": d[3],
 			"maxtime": d[4],
-			"late_entry":  startLate,
-			"early_exit": endLate,
-			"delay_total" : tLate , 
-			"early_entry" : startEr,
-			"late_exit" :endEr, 
-			"early_total" : tEr,
-			"workinghours": tHours,
-				})
+			"late_entry":  d[5],
+			"early_exit": d[6],
+			"delay_total" : to_hours(d[7]) , 
+			"early_entry" : d[8],
+			"late_exit" : d[9], 
+			"early_total" : to_hours(d[10]),
+			"workinghours": to_hours(d[11]),	})
 				
 	formatted_data.extend([{}])
 	return columns, formatted_data
+
+def to_hours(duration):
+	if duration:
+		totsec = duration.total_seconds()
+		h = totsec//3600
+		m = (totsec%3600) // 60
+		sec =(totsec%3600)%60
+		return "%d:%d:%d" %(h,m,sec)
+	else:
+		return timedelta(00,00,00)
 
 def get_columns():
 	return [
@@ -70,25 +99,7 @@ def get_columns():
 			"fieldtype": "Data",
 			"width": 170
 		},
-		{
-			"fieldname": "dateonly",
-			"label": _("Date"),
-			"fieldtype": "Data",
-			"width": 80
-		},
-		{
-			"fieldname": "mintime",
-			"label": _("CheckIn"),
-			"fieldtype": "Data",
-			"width": 65
-		},
-		{
-			"fieldname": "maxtime",
-			"label": _("CheckOut"),
-			"fieldtype": "Data",
-			"width": 75
-		},
-      
+		
 		
                 {
 			"fieldname": "late_entry",
@@ -132,7 +143,7 @@ def get_columns():
 			"fieldtype": "Data",
 			"width": 120
 		},
-			]
+	]
 
 def get_conditions(filters):
 	
@@ -141,6 +152,7 @@ def get_conditions(filters):
 	if filters.get("from"): conditions.append("DATE(em.time) >= %(from)s")
 	if filters.get("to"): conditions.append("DATE(em.time) <= %(to)s")	
 	return "where {}".format(" and ".join(conditions)) if conditions else ""
+
 
 def get_data(filters):
 	ini_list = frappe.db.sql("""SELECT em.employee as 'emponly',
@@ -164,3 +176,4 @@ def get_data(filters):
 	##frappe.msgprint("ini_list={0}".format(ini_list))
 
 	return ini_list
+

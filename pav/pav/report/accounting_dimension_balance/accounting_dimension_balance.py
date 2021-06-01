@@ -33,7 +33,7 @@ def execute(filters=None):
 		
 		closing_debit, closing_credit = toggle_debit_credit(opening_debit + debit, opening_credit + credit)
 
-		if filters.get("budget_against")=="Task" or filters.budget_against == "Property":
+		if filters.get("budget_against") in ["Task","Project Activities"] or filters.budget_against == "Property":
 			data.append([ccd.budget_against, ccd.budget_against_name, ccd.project, opening_debit, opening_credit, debit, credit, closing_debit, closing_credit])			
 		else:
 			data.append([ccd.budget_against, ccd.budget_against_name, opening_debit, opening_credit, debit, credit, closing_debit, closing_credit])
@@ -55,11 +55,11 @@ def get_columns(filters):
 	columns = [
 		_(filters.get("budget_against")) + ":Link/%s:120" % (filters.get("budget_against"))		
 	]
-	if filters.budget_against == "Task":
-		columns.append(_("Subject") + ":Data:200")
-		columns.append(_("Project") + ":Link/Project:100")		
+	if filters.budget_against in ["Task","Project Activities"]:
+		columns.append(_("Subject") + ":Data:300")
+		columns.append(_("Project") + ":Link/Project:100")	
 	else:
-		columns.append(_(filters.get("budget_against")+" Name") + ":Data:200")
+		columns.append(_(filters.get("budget_against")+" Name") + ":Data:300")
 	columns.append("Opening (Dr):Currency:120")
 	columns.append("Opening (Cr):Currency:120")
 	columns.append("Debit:Currency:120")
@@ -98,11 +98,13 @@ def get_dimension_target_details(dimensions,filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cond = ""
 	col = """ bal.{budget_against}_name """
-	if ((filters.budget_against == "Task" or filters.budget_against == "Property" ) and filters.get('project')):
+	if ((filters.budget_against in ["Task","Project Activities"] or filters.budget_against == "Property" ) and filters.get('project')):
 		cond += """and bal.project = %s""" % (frappe.db.escape(filters.get('project')))
 
 	if filters.budget_against == "Task":
 		col= """ bal.project as project, bal.subject """
+	elif filters.budget_against == "Project Activities":
+		col= """ bal.project as project, bal.project_activity """
 	else:
 		col= """ bal.{budget_against}_name """
 		col = """ bal.%s_name """ % (budget_against)
@@ -165,11 +167,13 @@ def get_opening_balances(dimensions,filters):
 	cond = ""
 	col = """ bal.{budget_against}_name """
 
-	if ((filters.budget_against == "Task" or filters.budget_against == "Property" ) and filters.get('project')):
+	if ((filters.budget_against in ["Task","Project Activities"] or filters.budget_against == "Property" ) and filters.get('project')):
 		cond += """and bal.project = %s""" % (frappe.db.escape(filters.get('project')))
 
 	if filters.budget_against == "Task":
 		col= """ bal.project as project, bal.subject """
+	elif filters.budget_against == "Project Activities":
+		col= """ bal.project as project, bal.project_activity """
 	else:
 		col= """ bal.{budget_against}_name """
 		col = """ bal.%s_name """ % (budget_against)

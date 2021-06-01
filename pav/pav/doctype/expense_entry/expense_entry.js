@@ -75,6 +75,7 @@ cur_frm.cscript.onload = function (doc) {
         cur_frm.set_value("posting_date", frappe.datetime.get_today());
         //cur_frm.cscript.clear_sanctioned(doc);
     }
+    frappe.breadcrumbs.add('Accounts');
 };
 
 cur_frm.cscript.set_help = function (doc) {
