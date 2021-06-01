@@ -13,6 +13,30 @@ def get_data():
 					"onboard": 1,
 					"dependencies": ["Employee"],
 				},
+				{
+					"type": "report",
+					"name": "Employee Checkin Summery Report",
+					"doctype": "Employee",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Date wise Employee Checkin",
+					"doctype": "Employee Checkin",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Cumulative Attendance Report",
+					"doctype": "Employee",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Employee Leave and Attendance Status Report",
+					"doctype": "Employee",
+					"is_query_report": True
+				},
 			]
 		},
 	]

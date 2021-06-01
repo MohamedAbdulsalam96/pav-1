@@ -77,8 +77,7 @@ def get_data(filters, leave_types):
         if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
             row = [employee.name, employee.employee_name, employee.department]
 
-            for leave_type in leave_types:
-                #	if _(leave_type) == "ِAnnual Leave" or _(leave_type) == "Outstanding":
+            for leave_type in leave_types:                
                 row += calculate_leaves_details(filters, leave_type, employee)
             data.append(row)
     return data
