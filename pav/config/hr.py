@@ -8,6 +8,12 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Employee Checkin Request",
+					"description":_("Employee Checkin Request"),
+					"onboard": 1,
+					"dependencies": ["Employee"],
+				},{
+					"type": "doctype",
 					"name": "Travel Request",
 					"description":_("Travel Request"),
 					"onboard": 1,
@@ -37,6 +43,18 @@ def get_data():
 					"doctype": "Employee",
 					"is_query_report": True
 				},
+			]
+		},
+		{
+			"label": _("Payroll"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Payroll Entry Tool",
+					"description":_("Payroll Entry Tool"),
+					"onboard": 1,
+					"dependencies": ["Payroll Entry"],
+				}
 			]
 		},
 	]
