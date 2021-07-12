@@ -203,7 +203,7 @@ def get_att_conditions(filters):
 def get_conditions(filters):
     #start_date = filters.get("fromdate")
     #end_date = filters.get("todate")
-    conditions = " where time(time)>='07:00' and time(time)<='23:95' "
+    conditions = " where time(time)>='06:00' and time(time)<='18:10' "
     if filters.get("employee"):
         conditions += " and employee ='" + filters.get("employee") + "'"
     conditions += " and date(time)>='" + filters.get("fromdate") + \
