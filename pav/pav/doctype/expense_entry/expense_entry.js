@@ -14,9 +14,6 @@ pav.pav.ExpenseEntryController = frappe.ui.form.Controller.extend({
             frappe.msgprint(__("Please set the Company First"));
             return;
         } else {
-            console.log("child.account_currency=" + child.account_currency)
-            console.log("doc.currency=" + doc.currency)
-            console.log("doc.default_currency=" + doc.default_currency)
             //frappe.model.set_value(cdt, cdn, 'account_amount', child.amount * (child.account_currency==doc.currency?1:doc.conversion_rate));
             //frappe.model.set_value(cdt, cdn, 'base_amount', (child.amount * (child.account_currency==doc.currency?1:doc.conversion_rate)) * (child.account_currency==doc.default_account?1:1/doc.conversion_rate));
             frappe.model.set_value(cdt, cdn, 'account_amount',
@@ -48,9 +45,6 @@ pav.pav.ExpenseEntryController = frappe.ui.form.Controller.extend({
             },
             callback: function (r) {
                 if (r.message) {
-                    console.log("doc.currency=" + doc.currency)
-                    console.log("doc.default_currency=" + doc.default_currency)
-                    console.log("r.message.account_currency=" + r.message.account_currency)
                     d.default_account = r.message.account;
                     d.account_currency = r.message.account_currency;
                     if (doc.currency != r.message.account_currency && doc.default_currency != r.message.account_currency) {
@@ -149,7 +143,31 @@ frappe.ui.form.on("Expense Entry", {
     setup: function (frm) {
         frm.trigger("set_query_for_cost_center");
         frm.add_fetch("company", "cost_center", "cost_center");
-        frm.set_df_property('myfield',  'hidden',  (frm.doc.currency == frm.doc.default_currency) ? 1 : 0);        
+        //frm.set_df_property('myfield',  'hidden',  (frm.doc.currency == frm.doc.default_currency) ? 1 : 0);        
+        frm.set_query("default_account", "expense_entry_taxes_and_charges", function(doc) {
+			return {
+				filters: [
+					['company', '=', doc.company],
+					['account_type', 'in', ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]]
+				]
+			};
+		});
+        frm.set_query("cost_center", "expense_entry_taxes_and_charges", function(doc) {
+			return {
+				filters: [
+					['company', '=', doc.company],
+                    ['is_group', '=', 0]					
+				]
+			};
+		});
+        frm.set_query("cost_center", "expenses", function(doc) {
+			return {
+				filters: [
+					['company', '=', doc.company],
+                    ['is_group', '=', 0]					
+				]
+			};
+		});
     },
 
     onload: function (frm) { },
@@ -228,24 +246,21 @@ frappe.ui.form.on("Expense Entry", {
                         cur_frm.set_value("payment_account", r.message.account);
                         frm.refresh_fields();
                         cur_frm.refresh_field('currency');
-                    } else {
-                        console.log("yyyyyyyy")
+                    } else {                        
                         frm.set_value("payment_account", "");
                         frm.set_value("party", "");
                         frm.refresh_fields();
                         return;
                     }
                 }
-            });
-            console.log(frm.doc.payment_account)
+            });            
         }
         else if (frm.doc.party && frm.doc.type=='Bank Account') {
             frappe.db.get_value("Bank Account", {"name": frm.doc.party}, "account", function(value) {
                 if(value.account){
                     frm.set_value("payment_account", value.account);
                     cur_frm.refresh_field('payment_account');
-                }else{
-                    console.log("yyyyyyyy")
+                }else{                    
                     frm.set_value("payment_account", "");
                     frm.set_value("party", "");
                     frm.refresh_fields();
