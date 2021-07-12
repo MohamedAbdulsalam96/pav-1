@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "currency"
+  "currency",
+  "employee_name"
  ],
  "fields": [
   {
@@ -27,9 +28,15 @@
    "options": "Currency",
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "employee_name"
   }
  ],
- "modified": "2020-12-21 13:50:40.922084",
+ "modified": "2021-07-12 05:22:27.555883",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Employee Account",
@@ -48,8 +55,8 @@
   }
  ],
  "quick_entry": 1,
- "read_only": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "employee_name",
  "track_changes": 1
 }

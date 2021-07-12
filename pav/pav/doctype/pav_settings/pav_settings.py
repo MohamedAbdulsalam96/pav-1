@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2020, Ahmed Mohammed Alkuhlani and contributors
+# Copyright (c) 2021, Ahmed Mohammed Alkuhlani and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import getdate, add_days, today
+# import frappe
 from frappe.model.document import Document
 
-class PAVHRSettings(Document):
+class PAVSettings(Document):
 	def validate(self):
 		'''leave_auto_approve'''
-		enable_auto_approve_leave = frappe.db.get_single_value("PAV HR Settings", "enable_auto_approve_leave")
+		enable_auto_approve_leave = frappe.db.get_single_value("PAV Settings", "enable_auto_approve_leave")
 		if enable_auto_approve_leave==1 :
 			from_workflow_state=frappe.db.get_single_value('PAV HR Settings', 'from_workflow_state')
 			to_workflow_state=frappe.db.get_single_value('PAV HR Settings', 'to_workflow_state')

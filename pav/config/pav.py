@@ -140,8 +140,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Project Activity Settings",
-					"description":_("Project Activity Settings")
+					"name": "PAV Settings",
+					"description":_("PAV Settings")
 				}
 			]
 		},

@@ -25,24 +25,43 @@ class ExpenseEntry(AccountsController):
 	def validate(self):
 		self.validate_currency()
 		self.set_cost_center()
+		self.calc_expenses()
 
 	def validate_currency(self):
 		if not self.company or not self.default_currency:
 			frappe.throw(_("""Compnay is Mandatory"""))
-		for data in self.expenses:
-			if self.account_currency != self.currency or self.account_currency != self.default_currency:
-				frappe.throw(_("""Currency of {0} must to be Same Currency of Payment or Company Currency""").format(self.expense_type))
-
-	def validate_currency(self):
 		if self.default_currency==self.currency:
 			self.conversion_rate=1.0
+	
+	def validate_cost_center(self):
 		for data in self.expenses:
 			if not data.cost_center:
 				frappe.throw(_("""Cost Center is Mandatory"""))
 
-
-
-
+	def calc_expenses(self):
+		self.total_amount = 0
+		self.base_total_amount = 0
+		self.total_taxes_and_charges = 0
+		self.base_total_taxes_and_charges = 0
+		self.grand_total = 0
+		self.base_grand_total = 0
+		for data in self.expenses:
+			if self.currency != data.account_currency and self.default_currency != data.account_currency:
+				frappe.throw(_("""{0} Currency must to be equal Payment Currency or Company Currency""").format(data.expense_type))
+			data.account_amount = data.amount * (1 if data.account_currency == self.currency else self.conversion_rate)
+			data.base_amount = (data.amount * (1 if data.account_currency == self.currency else self.conversion_rate))	if data.account_currency == self.default_currency else	(data.amount * (1 if data.account_currency == self.currency else self.conversion_rate)) * (self.conversion_rate)
+			self.total_amount += flt(data.amount)
+			self.base_total_amount += flt(data.base_amount)
+		for data in self.expense_entry_taxes_and_charges:
+			if self.currency != data.account_currency and self.default_currency != data.account_currency:
+				frappe.throw(_("""{0} Currency must to be equal Payment Currency or Company Currency""").format(data.expense_type))
+			data.account_amount = data.amount * (1 if data.account_currency == self.currency else self.conversion_rate)
+			data.base_amount = (data.amount * (1 if data.account_currency == self.currency else self.conversion_rate))	if data.account_currency == self.default_currency else	(data.amount * (1 if data.account_currency == self.currency else self.conversion_rate)) * (self.conversion_rate)
+			self.total_taxes_and_charges += flt(data.amount)
+			self.base_total_taxes_and_charges += flt(data.base_amount)
+		self.grand_total=self.total_amount+self.total_taxes_and_charges
+		self.base_grand_total = self.base_total_amount+self.base_total_taxes_and_charges
+				
 	def set_status(self):
 		self.status = {
 			"0": "Draft",
@@ -70,7 +89,10 @@ class ExpenseEntry(AccountsController):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 
+		self.validate_cost_center()
 		self.update_task_and_project()
+		
+
 		if self.approval_status=="Approved":
 			self.make_gl_entries()
 
@@ -112,9 +134,28 @@ class ExpenseEntry(AccountsController):
 					"against_voucher_type": self.doctype,
 					"against_voucher": self.name,
 					"cost_center": data.cost_center,
-					"project": data.project
+					"project": data.project,
+					"remarks": data.remarks
 				}, item=data)
 			)
+		if self.expense_entry_taxes_and_charges:
+			for data in self.expense_entry_taxes_and_charges:
+				gl_entry.append(
+					self.get_gl_dict({
+						"posting_date": self.posting_date,					
+						"account": data.default_account,
+						"account_currency": data.account_currency,
+						"debit": data.base_amount,
+						"debit_in_account_currency": data.account_amount,
+						"conversion_rate":self.conversion_rate if data.account_currency!=self.default_currency else 1.0,
+						"against": self.payment_account,
+						"against_voucher_type": self.doctype,
+						"against_voucher": self.name,
+						"cost_center": data.cost_center,
+						"project": data.project,
+						"remarks": data.remarks
+					}, item=data)
+				)
 
 		# payment entry
 		if self.total_amount:
@@ -125,14 +166,15 @@ class ExpenseEntry(AccountsController):
 					"party": '' if self.type!='Employee Account' else self.party,
 					"account": self.payment_account,
 					"account_currency": self.currency,
-					"credit": self.base_total_amount,
-					"credit_in_account_currency": self.total_amount,
+					"credit": self.base_grand_total,
+					"credit_in_account_currency": self.grand_total,
 					"conversion_rate":self.conversion_rate if self.currency!=self.default_currency else 1.0,
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"against_voucher_type": self.doctype,
 					"against_voucher": self.name,
 					"cost_center": self.cost_center,
-					"project": self.project
+					"project": self.project,
+					"remark": self.remark
 				}, item=self)
 			)	
 

@@ -107,8 +107,9 @@ def set_account_currency(filters):
 
 def get_result(filters, account_details):
 	gl_entries, currency_list = get_gl_entries(filters)
-
-	data = get_data_with_opening_closing(filters, account_details, gl_entries)
+	if len(currency_list)<=1:
+		currency_list=None
+	data = get_data_with_opening_closing(filters, account_details, gl_entries,currency_list=currency_list)
 	#frappe.throw("result={0}".format(data))
 	result = get_result_as_list(data, filters, currency_list)
 	#frappe.throw("result={0}".format(result))
@@ -239,12 +240,12 @@ def get_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
-def get_data_with_opening_closing(filters, account_details, gl_entries):
+def get_data_with_opening_closing(filters, account_details, gl_entries,currency_list=None):
 	data = []
 
-	gle_map = initialize_gle_map(gl_entries, filters)
+	gle_map = initialize_gle_map(gl_entries, filters,currency_list=currency_list)
 
-	totals, entries = get_accountwise_gle(filters, gl_entries, gle_map)
+	totals, entries = get_accountwise_gle(filters, gl_entries, gle_map,currency_list=currency_list)
 
 	# Opening for filtered account
 	data.append(totals.opening)
@@ -278,21 +279,29 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 
 	return data
 
-def get_totals_dict():
-	def _get_debit_credit_dict(label):
-		return _dict(
+def get_totals_dict(currency_list=None):
+	def _get_debit_credit_dict(label,currency_list=None):
+		rt=_dict(
 			account="'{0}'".format(label),
 			debit=0.0,
 			credit=0.0,
-			debit_usd=0.0,
-			credit_usd=0.0,
 			debit_in_account_currency=0.0,
 			credit_in_account_currency=0.0
 		)
+		if currency_list:
+			if len(currency_list)>1:
+				for curr in currency_list:				
+					rt.update({				
+						'debit_'+frappe.scrub(curr): 0.0,
+						'credit_'+frappe.scrub(curr): 0.0,
+						'balance_'+frappe.scrub(curr): 0.0
+					})
+		#frappe.throw('{0}'.format((rt)))
+		return rt
 	return _dict(
-		opening = _get_debit_credit_dict(_('Opening')),
-		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
+		opening = _get_debit_credit_dict(_('Opening'),currency_list=currency_list),
+		total = _get_debit_credit_dict(_('Total'),currency_list=currency_list),
+		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'),currency_list=currency_list)
 	)
 
 def group_by_field(group_by):
@@ -303,52 +312,54 @@ def group_by_field(group_by):
 	else:
 		return 'voucher_no'
 
-def initialize_gle_map(gl_entries, filters):
+def initialize_gle_map(gl_entries, filters,currency_list=None):
 	gle_map = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
 
 	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
+		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(currency_list=currency_list), entries=[]))
 	return gle_map
 
 
-def get_accountwise_gle(filters, gl_entries, gle_map):
-	totals = get_totals_dict()
+def get_accountwise_gle(filters, gl_entries, gle_map,currency_list=None):
+	totals = get_totals_dict(currency_list=currency_list)
 	entries = []
 	consolidated_gle = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
 
-	def update_value_in_dict(data, key, gle):
-		if filters.get("company"):
-			currency = get_company_currency(filters["company"])
-		else:
-			company = get_default_company()
-			currency = get_company_currency(company)
-		#if currency!=gle.account_currency:
-		#else:
-			#frappe.msgprint("gle={0}".format(gle.account_currency))
-			data[key].debit += flt(gle.debit)
-			data[key].credit += flt(gle.credit)
-
-		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
-		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
-
+	def update_value_in_dict(data, key, gle,curr=None):	
+		#frappe.msgprint("{0}".format(data[key]))
+		if key in ['opening','closing','total']:
+			#frappe.throw("{0}".format((data[key])))
+			if curr!=get_company_currency(filters["company"]) and currency_list:
+				data[key]['debit_'+frappe.scrub(curr)] += flt(gle.debit_in_account_currency)
+				data[key]['credit_'+frappe.scrub(curr)] += flt(gle.credit_in_account_currency)
+			else:
+				data[key].debit += flt(gle.debit_in_account_currency)
+				data[key].credit += flt(gle.credit_in_account_currency)
+		elif curr==get_company_currency(filters["company"]):
+			data[key].debit += flt(gle.debit_in_account_currency)
+			data[key].credit += flt(gle.credit_in_account_currency)
+		elif curr!=get_company_currency(filters["company"]):
+			data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
+			data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
 		if data[key].against_voucher and gle.against_voucher:
 			data[key].against_voucher += ', ' + gle.against_voucher
 
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
-	for gle in gl_entries:
+
+	for gle in gl_entries:				
 		if (gle.posting_date < from_date or
 			(cstr(gle.is_opening) == "Yes" and not filters.get("show_opening_entries"))):
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'opening', gle)
-			update_value_in_dict(totals, 'opening', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'opening', gle,curr=gle.account_currency)
+			update_value_in_dict(totals, 'opening', gle,curr=gle.account_currency)
 
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
-			update_value_in_dict(totals, 'closing', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle,curr=gle.account_currency)
+			update_value_in_dict(totals, 'closing', gle,curr=gle.account_currency)
 
 		elif gle.posting_date <= to_date:
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
-			update_value_in_dict(totals, 'total', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle,curr=gle.account_currency)
+			update_value_in_dict(totals, 'total', gle,curr=gle.account_currency)
 			if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
 				gle_map[gle.get(group_by)].entries.append(gle)
 			elif filters.get("group_by") == _('Group by Voucher (Consolidated)'):
@@ -357,10 +368,10 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 				if key not in consolidated_gle:
 					consolidated_gle.setdefault(key, gle)
 				else:
-					update_value_in_dict(consolidated_gle, key, gle)
+					update_value_in_dict(consolidated_gle, key, gle,curr=gle.account_currency)
 
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
-			update_value_in_dict(totals, 'closing', gle)
+			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle,curr=gle.account_currency)
+			update_value_in_dict(totals, 'closing', gle,curr=gle.account_currency)
 
 	for key, value in consolidated_gle.items():
 		entries.append(value)
@@ -368,6 +379,11 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 	return totals, entries
 
 def get_result_as_list(data, filters, currency_list):
+	bal={}
+	if currency_list:
+		if len(currency_list)>1:
+			for curr in currency_list:
+				bal[frappe.scrub(curr)]=0
 	balance, balance_in_account_currency = 0, 0
 	inv_details = get_supplier_invoice_details()
 	if filters.get("company"):
@@ -376,36 +392,46 @@ def get_result_as_list(data, filters, currency_list):
 		company = get_default_company()
 		currency = get_company_currency(company)
 	
-	if len(currency_list)>1:
-		for curr in currency_list:
-			if curr!=currency:
-				currency_list[curr]=0
+	#if len(currency_list)>1:
+	#	for curr in currency_list:
+	#		if curr!=currency:
+	#			currency_list[curr]=0
 				#frappe.msgprint("ee={0}".format(curr))
 	#frappe.msgprint("ll={0}".format(currency_list))
-
-	for d in data:		
+	for d in data:
 		if not d.get('posting_date'):
 			balance, balance_in_account_currency = 0, 0
-
-		if d.get('account_currency') and currency!=d.get('account_currency'):
-			#frappe.msgprint("cr={0}".format(d.get('account_currency')))
-			curr=d.get('account_currency')
-			curr=frappe.scrub(curr)
-			d['debit_'+curr]=d.get('debit')
-			d['credit_'+curr]=d.get('credit')
-			currency_list[d.get('account_currency')] = get_balance(d, currency_list[d.get('account_currency')], "debit_"+curr, "credit_"+curr)
-			d['balance_'+curr] = currency_list[d.get('account_currency')]
-			#frappe.msgprint("pp={0}".format(currency_list[d.get('account_currency')]))
-			d['debit'] = None
-			d['credit'] = None
-			d['balance'] = None
-		else:
-			balance = get_balance(d, balance, 'debit', 'credit')
-			d['balance'] = balance
-
-			#d['account_currency'] = filters.account_currency
-			d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
-
+			if currency_list:
+				for curr in currency_list:
+					bal[frappe.scrub(curr)]=0
+		#frappe.msgprint("{0}".format(d))
+		if d.get('account'):
+			if d.account in ["'{0}'".format(_('Opening')),"'{0}'".format(_('Total')),"'{0}'".format(_('Closing (Opening + Total)'))]:
+				if currency_list:
+					for curr in currency_list:
+						if curr!=currency:
+							curr=frappe.scrub(curr)
+							bal[curr] = get_balance(d, bal[curr], 'debit_'+curr, 'credit_'+curr)
+							d['balance_'+curr] = bal[curr]
+				balance = get_balance(d, balance, 'debit', 'credit')
+				d['balance'] = balance
+			else:
+				if currency!=d.get('account_currency') and currency_list:
+					curr=d.get('account_currency')
+					curr=frappe.scrub(curr)
+					d['debit_'+curr]=d.get('debit_in_account_currency')
+					d['credit_'+curr]=d.get('credit_in_account_currency')
+					bal[curr] = get_balance(d, bal[curr], 'debit_'+curr, 'credit_'+curr)
+					d['balance_'+curr] = bal[curr]
+					d['debit'] = None
+					d['credit'] = None
+					d['balance'] = None			
+					d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
+				else:
+					balance = get_balance(d, balance, 'debit', 'credit')
+					d['balance'] = balance
+					d['bill_no'] = inv_details.get(d.get('against_voucher'), '')	
+	
 	return data
 
 def get_supplier_invoice_details():
@@ -471,28 +497,29 @@ def get_columns(filters,currency_list):
 			"width": 130
 		}
 	]
-	if len(currency_list)>1:
-		for curr in currency_list:
-			if curr!=currency:
-				columns.extend([
-				{
-					"label": _("Debit ({0})".format(curr)),
-					"fieldname": "debit_"+frappe.scrub(curr),
-					"fieldtype": "Float",
-					"width": 100
-				},
-				{
-					"label": _("Credit ({0})".format(curr)),
-					"fieldname": "credit_"+frappe.scrub(curr),
-					"fieldtype": "Float",
-					"width": 100
-				},
-				{
-					"label": _("Balance ({0})".format(curr)),
-					"fieldname": "balance_"+frappe.scrub(curr),
-					"fieldtype": "Float",
-					"width": 130
-				}])	
+	if currency_list:
+		if len(currency_list)>1:
+			for curr in currency_list:
+				if curr!=currency:
+					columns.extend([
+					{
+						"label": _("Debit ({0})".format(curr)),
+						"fieldname": "debit_"+frappe.scrub(curr),
+						"fieldtype": "Float",
+						"width": 100
+					},
+					{
+						"label": _("Credit ({0})".format(curr)),
+						"fieldname": "credit_"+frappe.scrub(curr),
+						"fieldtype": "Float",
+						"width": 100
+					},
+					{
+						"label": _("Balance ({0})".format(curr)),
+						"fieldname": "balance_"+frappe.scrub(curr),
+						"fieldtype": "Float",
+						"width": 130
+					}])	
 
 	columns.extend([
 		{

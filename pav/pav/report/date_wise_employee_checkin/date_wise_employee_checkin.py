@@ -5,23 +5,53 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import (flt,cstr)
+from datetime import datetime,timedelta,time
+
+def delay(max, min):
+	return max - min if max and min and max > min else None
+
+def delayTotal(max, min):
+	if max and min:
+		return max + min
+	elif max and not min:
+		return max
+	elif min and not max:
+		return min 
 
 def execute(filters=None):
 	if not filters: filters = {}
 	formatted_data = []
 	columns = get_columns()
 	data = get_data(filters)
+
+	t= timedelta(00,00,00)
+	#dd= timedelta(hours=t.hours,minutes=t.minutes)
 	for d in data:
-		formatted_data.append({
+			
+			startLate = delay(d[3], d[5])
+			endLate = delay(d[6], d[4])
+			tLate = delayTotal(startLate, endLate)
+
+			startEr = delay(d[5], d[3])
+			endEr = delay(d[4], d[6])
+			tEr = delayTotal(startEr, endEr)
+
+			tHours = d[4] - d[3] if d[4] and d[3] and d[4] > d[3] else timedelta(00,00,00)
+			formatted_data.append({
 			"emponly": d[0],
 			"empname": d[1],
 			"dateonly": d[2],
 			"mintime": d[3],
 			"maxtime": d[4],
-			"delaytime": (d[5] if (d[8]<d[3]) else None) if d[8] else None,
-			"earlyentry":(d[6] if (d[8]>d[3]) else None) if d[8] else None,
-			"workinghours": d[7]
-		})
+			"late_entry":  startLate,
+			"early_exit": endLate,
+			"delay_total" : tLate , 
+			"early_entry" : startEr,
+			"late_exit" :endEr, 
+			"early_total" : tEr,
+			"workinghours": tHours,
+				})
+				
 	formatted_data.extend([{}])
 	return columns, formatted_data
 
@@ -32,52 +62,77 @@ def get_columns():
 			"label": _("Employee "),
 			"fieldtype": "Link",
 			"options": "Employee",
-			"width": 150
+			"width": 120
 		},
 		{
 			"fieldname": "empname",
 			"label": _("Employee Name"),
 			"fieldtype": "Data",
-			"width": 200
+			"width": 170
 		},
 		{
 			"fieldname": "dateonly",
 			"label": _("Date"),
 			"fieldtype": "Data",
-			"width": 100
+			"width": 80
 		},
 		{
 			"fieldname": "mintime",
-			"label": _("First"),
+			"label": _("CheckIn"),
 			"fieldtype": "Data",
-			"width": 70
+			"width": 65
 		},
 		{
 			"fieldname": "maxtime",
-			"label": _("Last"),
+			"label": _("CheckOut"),
 			"fieldtype": "Data",
-			"width": 70
+			"width": 75
 		},
+      
+		
                 {
-			"fieldname": "delaytime",
-			"label": _("Delay -"),
+			"fieldname": "late_entry",
+			"label": _("Late Entry"),
 			"fieldtype": "Data",
-			"width": 70
+			"width": 80
+		},
+			        {
+			"fieldname": "early_exit",
+			"label": _("Early Exit"),
+			"fieldtype": "Data",
+			"width": 80
+		},
+		      {
+			"fieldname": "delay_total",
+			"label": _("Delay Total"),
+			"fieldtype": "Data",
+			"width": 85
 		},
 		 {
-			"fieldname": "earlyentry",
-			"label": _("Early +"),
+			"fieldname": "early_entry",
+			"label": _("Early Entry"),
 			"fieldtype": "Data",
-			"width": 70
+			"width": 80
 		 },
-                {
+		 		{
+			"fieldname": "late_exit",
+			"label": _("Late Exit"),
+			"fieldtype": "Data",
+			"width": 80
+		},
+		{
+			"fieldname": "early_total",
+			"label": _("Early Total"),
+			"fieldtype": "Data",
+			"width": 85
+		},
+		 {
 			"fieldname": "workinghours",
-			"label": _("Working hours"),
+			"label": _("Working Hours"),
 			"fieldtype": "Data",
 			"width": 120
-		}
-		]
-
+		},
+			]
 
 def get_conditions(filters):
 	
@@ -87,7 +142,6 @@ def get_conditions(filters):
 	if filters.get("to"): conditions.append("DATE(em.time) <= %(to)s")	
 	return "where {}".format(" and ".join(conditions)) if conditions else ""
 
-
 def get_data(filters):
 	ini_list = frappe.db.sql("""SELECT em.employee as 'emponly',
 		em.employee_name as 'empname', DATE(em.time) as dateonly,
@@ -95,14 +149,12 @@ def get_data(filters):
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as mintime,
 		(select TIME(MAX(l.time)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
 			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as maxtime,
-		(select TIMEDIFF(MIN(l.time),shift_start)  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as delaytime,
-		(select TIMEDIFF(shift_start,MIN(l.time))  FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as earlyentry,
-		(select TIMEDIFF(maxtime,mintime) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as workinghour,
+
 		(select TIME(MIN(l.shift_start)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as shift_start
+			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as shift_start,
+		(select TIME(MAX(l.shift_end)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
+			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as shift_end
+
 		FROM `tabEmployee Checkin` em
 		{conditions} GROUP BY dateonly, employee
 		""".format(

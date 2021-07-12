@@ -1,5 +1,5 @@
 {
- "creation": "2020-12-23 13:32:43.202258",
+ "creation": "2021-07-12 02:22:09.760035",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -9,7 +9,8 @@
   "to_workflow_state",
   "period",
   "section_break_5",
-  "enable_two_period_in_ecr"
+  "enable_two_period_in_ecr",
+  "project_activity_records_to_be_created_by"
  ],
  "fields": [
   {
@@ -44,13 +45,20 @@
    "fieldname": "enable_two_period_in_ecr",
    "fieldtype": "Check",
    "label": "Enable Two Period in ECR"
+  },
+  {
+   "default": "Naming Series",
+   "fieldname": "project_activity_records_to_be_created_by",
+   "fieldtype": "Select",
+   "label": "Project Activity Records to be created by",
+   "options": "Naming Series\nProject Activity Code"
   }
  ],
  "issingle": 1,
- "modified": "2021-04-06 14:11:18.433520",
+ "modified": "2021-07-12 02:23:17.126594",
  "modified_by": "Administrator",
  "module": "PAV",
- "name": "PAV HR Settings",
+ "name": "PAV Settings",
  "owner": "Administrator",
  "permissions": [
   {

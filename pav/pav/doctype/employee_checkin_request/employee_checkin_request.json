@@ -12,6 +12,9 @@
   "checkin_approver",
   "column_break_4",
   "date",
+  "is_manual",
+  "from_time",
+  "to_time",
   "enable_two_period_in_ecr",
   "period_type",
   "log_type",
@@ -45,12 +48,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.is_manual==0",
    "fieldname": "log_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Log Type",
-   "options": "\nIN\nOUT\nALL",
-   "reqd": 1
+   "options": "\nIN\nOUT\nALL"
   },
   {
    "fieldname": "amended_from",
@@ -91,21 +94,40 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_manual==0",
    "fieldname": "enable_two_period_in_ecr",
    "fieldtype": "Check",
    "label": "Enable Two Period in ECR",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.enable_two_period_in_ecr==1",
+   "depends_on": "eval:(doc.enable_two_period_in_ecr==1 && doc.is_manual==0)",
    "fieldname": "period_type",
    "fieldtype": "Select",
    "label": "Period Type",
    "options": "\nFirst\nSecond\nALL"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_manual",
+   "fieldtype": "Check",
+   "label": "Is Manual"
+  },
+  {
+   "depends_on": "is_manual",
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "label": "From Time"
+  },
+  {
+   "depends_on": "is_manual",
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "To Time"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-04-06 14:39:16.657010",
+ "modified": "2021-07-12 02:18:30.973346",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Employee Checkin Request",

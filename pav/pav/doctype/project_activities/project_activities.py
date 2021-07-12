@@ -7,7 +7,7 @@ import json
 
 import frappe
 from frappe import _, throw
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, flt
 from frappe.utils.nestedset import NestedSet
 from frappe.desk.form.assign_to import close_all_assignments, clear
 from frappe.utils import date_diff
@@ -38,7 +38,7 @@ def check_if_child_exists(name):
 
  
 @frappe.whitelist()
-def get_children(doctype, parent, project_activities=None, project=None, is_root=False):
+def get_children(doctype, parent, company=None, project=None, project_activities=None, is_root=False):
 
 	filters = [['docstatus', '<', '2']]
 
@@ -59,6 +59,13 @@ def get_children(doctype, parent, project_activities=None, project=None, is_root
 		'is_group as expandable'
 	], filters=filters, order_by='name')
 
+	if company:
+		company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
+		for act in activities:
+			act["company_currency"] = company_currency
+			act["balance"] = flt(get_balance_on(company,act.get("value"), in_account_currency=False))
+	
+	frappe.msgprint("{0}".format(company))
 	# return activities
 	return activities
 
@@ -88,3 +95,18 @@ def add_multiple_project_activities(data, parent):
 		new_project_activities = frappe.get_doc(new_doc)
 		new_project_activities.insert()
 
+@frappe.whitelist()
+def get_balance_on(company,project_activities, in_account_currency=False, ignore_account_permission=False):	
+	cond=[]
+	lft, rgt = frappe.db.get_value("Project Activities", project_activities, ["lft", "rgt"])	
+	cond.append(""" project_activities in (select name from `tabProject Activities`
+		where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+	cond.append(""" company = %s """ % (frappe.db.escape(company, percent=False)))
+	select_field = "sum(debit) - sum(credit)"
+	bal = frappe.db.sql("""
+		SELECT {0}
+		FROM `tabGL Entry` 
+		WHERE {1}""".format(select_field, " and ".join(cond)))[0][0]
+
+	# if bal is None, return 0
+	return flt(bal)

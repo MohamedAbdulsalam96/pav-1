@@ -2,22 +2,28 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Checkin Request', {
-	refresh: function (frm) {
-		console.log('huiiiiiiiiiiii')
+	refresh: function (frm) {		
+		frm.set_df_property('log_type', 'reqd', frm.doc.is_manual==1?0:1);
 		if (frm.is_new()) {
-			frappe.model.get_value('PAV HR Settings', { 'name': 'PAV HR Settings' }, 'enable_two_period_in_ecr',
+			frappe.model.get_value('PAV Settings', { 'name': 'PAV Settings' }, 'enable_two_period_in_ecr',
 				function (value) {
 					console.log(value.enable_two_period_in_ecr)
 					frm.set_value('enable_two_period_in_ecr', value.enable_two_period_in_ecr)
 					if(value.enable_two_period_in_ecr==1){
-						frm.set_df_property('period_type', 'reqd', 1);
+						frm.set_df_property('period_type', 'reqd', frm.doc.is_manual==1?0:1);
 					}
 				})
 		}else{
-			frm.set_df_property('period_type', 'reqd', frm.doc.enable_two_period_in_ecr);
+			if (frm.doc.enable_two_period_in_ecr==1){
+				frm.set_df_property('period_type', 'reqd', frm.doc.is_manual==1?0:1);
+			}			
+		}		
+	},
+	is_manual: function (frm) {
+		frm.set_df_property('log_type', 'reqd', frm.doc.is_manual==1?0:1);
+		if (frm.doc.enable_two_period_in_ecr==1){
+			frm.set_df_property('period_type', 'reqd', frm.doc.is_manual==1?0:1);
 		}
-		
-
 	},
 	employee: function (frm) {
 		frm.trigger("set_leave_approver");

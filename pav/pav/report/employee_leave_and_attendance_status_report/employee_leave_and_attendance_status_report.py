@@ -22,8 +22,8 @@ def execute(filters=None):
 def get_columns(leave_types):
     columns = [
         _("Employee") + ":Link.Employee:150",
-        _("Employee Name") + "::200",
-        _("Department") + "::150"
+        _("Employee Name") + "::150",
+        _("Department") + "::120"
     ]
 
     for leave_type in leave_types:
@@ -31,9 +31,9 @@ def get_columns(leave_types):
         columns.append(_(leave_type) + " " + _("Opening") + ":Float:160")
         columns.append(_(leave_type) + " " + _("Allocated") + ":Float:160")
         columns.append(_(leave_type) + " " + _("Taken") + ":Float:160")
-        columns.append(_(leave_type) + " " + _("Balance") + ":Float:160")
         columns.append(_(leave_type) + " " +
                        _("Pending") + ":Float:160")
+        columns.append(_(leave_type) + " " + _("Balance") + ":Float:160")
 
         return columns
 
@@ -47,6 +47,8 @@ def get_conditions(filters):
         conditions.update({"department": filters.get("department")})
     if filters.get("employee"):
         conditions.update({"employee": filters.get("employee")})
+    if filters.get("Branch"):
+        conditions.update({"branch": filters.get("branch")})
 
     return conditions
 
@@ -75,8 +77,7 @@ def get_data(filters, leave_types):
         if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
             row = [employee.name, employee.employee_name, employee.department]
 
-            for leave_type in leave_types:
-                #	if _(leave_type) == "ِAnnual Leave" or _(leave_type) == "Outstanding":
+            for leave_type in leave_types:                
                 row += calculate_leaves_details(filters, leave_type, employee)
             data.append(row)
     return data
@@ -109,7 +110,7 @@ def calculate_leaves_details(filters, leave_type, employee):
                   (leaves_taken + expired_leaves), 0)
     Outstanding = max(new_allocation1 - leaves_taken1, 0)
 
-    return [opening, new_allocation, leaves_taken,  closing,Outstanding]
+    return [opening, new_allocation, leaves_taken,Outstanding,closing]
 
 
 def remove_expired_leave(records):

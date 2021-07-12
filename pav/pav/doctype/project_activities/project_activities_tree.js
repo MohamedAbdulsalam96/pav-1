@@ -5,6 +5,13 @@ frappe.treeview_settings['Project Activities'] = {
 	add_tree_node:  "pav.pav.doctype.project_activities.project_activities.add_node",
 	filters: [
 		{
+			fieldname: "company",
+			fieldtype:"Select",
+			options: erpnext.utils.get_tree_options("company"),
+			label: __("Company"),
+			default: erpnext.utils.get_tree_default("company"),
+		},
+		{
 			fieldname: "project",
 			fieldtype:"Link",
 			options: "Project",
@@ -36,6 +43,22 @@ frappe.treeview_settings['Project Activities'] = {
 		frappe.treeview_settings['Project Activities'].page = {};
 		$.extend(frappe.treeview_settings['Project Activities'].page, me.page);
 		me.make_tree();
+	},
+	onrender: function(node) {
+		console.log('kkk')
+		if(frappe.boot.user.can_read.indexOf("GL Entry") !== -1){
+			
+			// show Dr if positive since balance is calculated as debit - credit else show Cr
+			let balance = node.data.balance;
+			let dr_or_cr = balance > 0 ? "Dr": "Cr";
+
+			if (node.data && node.data.balance!==undefined) {
+				$('<span class="balance-area pull-right text-muted small">'
+					+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
+					+ " " + dr_or_cr
+					+ '</span>').insertBefore(node.$ul);
+			}
+		}
 	},
 	toolbar: [
 		{

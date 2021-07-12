@@ -12,27 +12,27 @@ frappe.query_reports["Accounting Dimension wise Stock Planned and Actual"] = {
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1
 		},
-		{
-			"fieldname": "fiscal_year",
-			"label": __("Fiscal Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": frappe.defaults.get_user_default("fiscal_year"),
-			"reqd": 1,
-			"on_change": function(query_report) {
-				var fiscal_year = query_report.get_values().fiscal_year;
-				if (!fiscal_year) {
-					return;
-				}
-				frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
-					var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-					frappe.query_report.set_filter_value({
-						from_date: fy.year_start_date,
-						to_date: fy.year_end_date
-					});
-				});
-			}
-		},
+		// {
+		// 	"fieldname": "fiscal_year",
+		// 	"label": __("Fiscal Year"),
+		// 	"fieldtype": "Link",
+		// 	"options": "Fiscal Year",
+		// 	"default": frappe.defaults.get_user_default("fiscal_year"),
+		// 	"reqd": 1,
+		// 	"on_change": function(query_report) {
+		// 		var fiscal_year = query_report.get_values().fiscal_year;
+		// 		if (!fiscal_year) {
+		// 			return;
+		// 		}
+		// 		frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
+		// 			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+		// 			frappe.query_report.set_filter_value({
+		// 				from_date: fy.year_start_date,
+		// 				to_date: fy.year_end_date
+		// 			});
+		// 		});
+		// 	}
+		// },
 		{
 			"fieldname": "from_date",
 			"label": __("From Date"),
@@ -44,6 +44,17 @@ frappe.query_reports["Accounting Dimension wise Stock Planned and Actual"] = {
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.defaults.get_user_default("year_end_date"),
+		},
+		{
+			fieldname: "value_quantity",
+			label: __("Value Or Qty"),
+			fieldtype: "Select",
+			options: [
+				{ "value": "Value", "label": __("Value") },
+				{ "value": "Quantity", "label": __("Quantity") },
+			],
+			default: "Quantity",
+			reqd: 1
 		},
 		{
 			fieldname: "budget_against",
@@ -66,10 +77,16 @@ frappe.query_reports["Accounting Dimension wise Stock Planned and Actual"] = {
 
 				let budget_against = frappe.query_report.get_filter_value('budget_against');
 				if (!budget_against) return;
-
 				return frappe.db.get_link_options(budget_against, txt);
-			}
-		}
+			},
+		},
+		{
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "Link",
+			options: "Project",
+			depends_on: 'eval:doc.budget_against=="Task"',
+		},
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
 		//value = $(`<span style='font-weight:bold'>${value}</span>`);
