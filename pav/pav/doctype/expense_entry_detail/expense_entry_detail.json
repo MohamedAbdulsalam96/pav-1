@@ -8,7 +8,7 @@
   "default_account",
   "account_currency",
   "section_break_4",
-  "description",
+  "remarks",
   "section_break_6",
   "amount",
   "account_amount",
@@ -44,18 +44,6 @@
   {
    "fieldname": "section_break_4",
    "fieldtype": "Section Break"
-  },
-  {
-   "fetch_from": "expense_type.description",
-   "fetch_if_empty": 1,
-   "fieldname": "description",
-   "fieldtype": "Text Editor",
-   "in_list_view": 1,
-   "label": "Description",
-   "oldfieldname": "description",
-   "oldfieldtype": "Small Text",
-   "print_width": "300px",
-   "width": "300px"
   },
   {
    "fieldname": "section_break_6",
@@ -127,10 +115,22 @@
    "label": "Amount (Account Currency)",
    "options": "account_currency",
    "read_only": 1
+  },
+  {
+   "fetch_from": "expense_type.description",
+   "fetch_if_empty": 1,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Remarks",
+   "oldfieldname": "description",
+   "oldfieldtype": "Small Text",
+   "print_width": "300px",
+   "width": "300px"
   }
  ],
  "istable": 1,
- "modified": "2020-12-21 12:23:29.953325",
+ "modified": "2021-07-12 01:29:53.469226",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Expense Entry Detail",
