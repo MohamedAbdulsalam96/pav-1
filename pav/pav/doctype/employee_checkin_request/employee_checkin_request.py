@@ -9,8 +9,17 @@ from frappe.model.document import Document
 
 class EmployeeCheckinRequest(Document):
 	def validate(self):
-		if not self.employee or not self.log_type:
-			frappe.throw(_("""Employee and Log Type are mandatory"""))
+		if not self.employee:
+			frappe.throw(_("""Employee is mandatory"""))
+		if self.is_manual:
+			if not self.from_time or not self.to_time:
+				frappe.throw(_("""Times are mandatory"""))
+			if self.from_time==self.to_time:
+				frappe.throw(_("""Times must be not same"""))
+			if self.from_time>self.to_time:
+				frappe.throw(_("""To Time must be greater than From Time"""))
+		elif not self.log_type:		
+			frappe.throw(_("""Log Type is mandatory"""))
 
 	
 	def on_submit(self):
@@ -24,7 +33,24 @@ class EmployeeCheckinRequest(Document):
 		if not emp.default_shift:
 			frappe.throw(_("""Employee should to have Default Shift"""))
 		shift = frappe.get_doc("Shift Type", emp.default_shift)
-		if self.enable_two_period_in_ecr==1:
+		if self.is_manual:
+			ec = frappe.get_doc(frappe._dict({
+				"doctype": "Employee Checkin",
+				"employee": self.employee,
+				"log_type": "IN",
+				"time": get_datetime(formatdate(self.date,'YYYY-mm-dd')+' '+format_time(self.from_time)),
+				"employee_checkin_request": self.name
+			}))
+			ec.insert()
+			ec = frappe.get_doc(frappe._dict({
+				"doctype": "Employee Checkin",
+				"employee": self.employee,
+				"log_type": "OUT",
+				"time": get_datetime(formatdate(self.date,'YYYY-mm-dd')+' '+format_time(self.to_time)),
+				"employee_checkin_request": self.name
+			}))
+			ec.insert()
+		elif self.enable_two_period_in_ecr==1:
 			if self.period_type=='First':
 				if self.log_type=='ALL':
 					ec = frappe.get_doc(frappe._dict({
