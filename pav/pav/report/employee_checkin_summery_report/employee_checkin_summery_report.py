@@ -86,8 +86,9 @@ def execute(filters=None):
         row = [d, frappe.utils.data.get_weekday(d), '', '', '', '', '', '']
         data.append(row)
         conditions = get_conditions(filters)
-    sq = frappe.db.sql("""SELECT  date(time)as ckin_date,time(min(time))as in_time,time(max(time))as out_time,TIMEDIFF(time(max(time)),time(min(time))) as working_hours 
+    sq = frappe.db.sql("""SELECT  date(time) as ckin_date,time(min(time)) as in_time,time(max(time)) as out_time,TIMEDIFF(time(max(time)),time(min(time))) as working_hours 
 	FROM `tabEmployee Checkin` %s""" % conditions, as_dict=1)
+    # frappe.throw("{0}".format(sq))
     for at in sq:
         for dd in data:
             if at.ckin_date == dd[0]:
@@ -203,9 +204,10 @@ def get_att_conditions(filters):
 def get_conditions(filters):
     #start_date = filters.get("fromdate")
     #end_date = filters.get("todate")
-    conditions = " where time(time)>='06:00' and time(time)<='18:10' "
+    conditions = ""
+    # conditions = " where time(time)>='06:00' and time(time)<='18:10' "
     if filters.get("employee"):
-        conditions += " and employee ='" + filters.get("employee") + "'"
+        conditions += " where employee ='" + filters.get("employee") + "'"
     conditions += " and date(time)>='" + filters.get("fromdate") + \
         "' and date(time)<='" + filters.get("todate") + "' group by date(time)"
     # frappe.utils.data.formatdate(filters.get("todate"),"dd-mm-yyyy")
