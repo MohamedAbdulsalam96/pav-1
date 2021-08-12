@@ -99,7 +99,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Currency"),
 				"fieldtype": "Select",
 				"options": erpnext.get_presentation_currency_list(),
-				"reqd": 1
+				"reqd": 0
 			}
 		],
 		"formatter": erpnext.financial_statements.formatter,

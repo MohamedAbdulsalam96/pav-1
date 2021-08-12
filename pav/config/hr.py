@@ -57,4 +57,16 @@ def get_data():
 				}
 			]
 		},
+		{
+			"label": _("Loans"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Loans Entry",
+					"description":_("Loans Entry"),
+					"onboard": 1,
+					"dependencies": ["Loan Type"],
+				}
+			]
+		},
 	]

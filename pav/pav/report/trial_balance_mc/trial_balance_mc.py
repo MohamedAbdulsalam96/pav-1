@@ -53,7 +53,7 @@ def validate_filters(filters):
 
 def get_data(filters):
 
-	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+	accounts = frappe.db.sql("""select name, account_number, account_currency, parent_account, account_name, root_type, report_type, lft, rgt
 
 		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
 	company_currency = erpnext.get_company_currency(filters.company)
@@ -62,10 +62,12 @@ def get_data(filters):
 		return None
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
-
-	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
-		where company=%s and account_currency= %s """, (filters.company,filters.presentation_currency))[0]
-
+	if filters.presentation_currency:
+		min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
+			where company=%s and account_currency= %s """, (filters.company,filters.presentation_currency))[0]
+	else:
+		min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
+			where company=%s """, (filters.company))[0]
 	gl_entries_by_account = {}
 
 	opening_balances = get_opening_balances(filters)
@@ -145,7 +147,7 @@ def get_rootwise_opening_balances(filters, report_type):
 
 	gle = frappe.db.sql("""
 		select
-			account, sum(debit_in_account_currency) as opening_debit, sum(credit_in_account_currency) as opening_credit
+			account, sum(debit_in_account_currency) as opening_debit, sum(credit_in_account_currency) as opening_credit, account_currency
 		from `tabGL Entry`
 		where
 			company=%(company)s
@@ -183,7 +185,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"parent_account": None,
 		"indent": 0,
 		"has_value": True,
-		"currency": company_currency
+		"account_currency": company_currency
 	}
 
 	for d in accounts:
@@ -197,9 +199,10 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 			if cstr(entry.is_opening) != "Yes":
 				d["debit"] += flt(entry.debit)
 				d["credit"] += flt(entry.credit)
+				# frappe.msgprint("{0}".format(entry.debit_in_account_currency))
 
 		d["closing_debit"] = d["opening_debit"] + d["debit"]
-		d["closing_credit"] = d["opening_credit"] + d["credit"]
+		d["closing_credit"] = d["opening_credit"] + d["credit"]		
 
 		prepare_opening_closing(d)
 
@@ -232,11 +235,11 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			"indent": d.indent,
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
-			"currency": company_currency,
+			"account_currency": d.account_currency,
 			"account_name": ('{} - {}'.format(d.account_number, d.account_name)
 				if d.account_number else d.account_name)
 		}
-
+		frappe.msgprint("{0}".format(row))
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
 
@@ -261,8 +264,8 @@ def get_columns():
 			"width": 300
 		},
 		{
-			"fieldname": "currency",
-			"label": _("Currency"),
+			"fieldname": "account_currency",
+			"label": _("Account Currency"),
 			"fieldtype": "Link",
 			"options": "Currency",
 			"width": 50,
@@ -272,42 +275,42 @@ def get_columns():
 			"fieldname": "opening_debit",
 			"label": _("Opening (Dr)"),
 			"fieldtype": "Currency",
-			"options": "currency",
+			"options": "account_currency",
 			"width": 120
 		},
 		{
 			"fieldname": "opening_credit",
 			"label": _("Opening (Cr)"),
 			"fieldtype": "Currency",
-			"options": "currency",
+			"options": "account_currency",
 			"width": 120
 		},
 		{
 			"fieldname": "debit",
 			"label": _("Debit"),
 			"fieldtype": "Currency",
-			"options": "currency",
+			"options": "account_currency",
 			"width": 120
 		},
 		{
 			"fieldname": "credit",
 			"label": _("Credit"),
 			"fieldtype": "Currency",
-			"options": "currency",
+			"options": "account_currency",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_debit",
 			"label": _("Closing (Dr)"),
 			"fieldtype": "Currency",
-			"options": "currency",
+			"options": "account_currency",
 			"width": 120
 		},
 		{
 			"fieldname": "closing_credit",
 			"label": _("Closing (Cr)"),
 			"fieldtype": "Currency",
-			"options": "currency",
+			"options": "account_currency",
 			"width": 120
 		}
 	]
@@ -332,11 +335,16 @@ def set_gl_entries_by_account(
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
-	accounts = frappe.db.sql_list("""select name from `tabAccount`
-		where lft >= %s and rgt <= %s and company = %s and account_currency = %s """, (root_lft, root_rgt, company,filters.presentation_currency))
+	if filters.presentation_currency:
+		accounts = frappe.db.sql_list("""select name from `tabAccount`
+			where lft >= %s and rgt <= %s and company = %s and account_currency = %s """, (root_lft, root_rgt, company,filters.presentation_currency))
+	else:
+		accounts = frappe.db.sql_list("""select name from `tabAccount`
+			where lft >= %s and rgt <= %s and company = %s """, (root_lft, root_rgt, company))
 
 	if accounts:
-		additional_conditions += " and account_currency = '{}'".format(filters.presentation_currency)	
+		if filters.presentation_currency:
+			additional_conditions += " and account_currency = '{}'".format(filters.presentation_currency)	
 
 		additional_conditions += " and account in ({})"\
 			.format(", ".join([frappe.db.escape(d) for d in accounts]))	
@@ -356,10 +364,7 @@ def set_gl_entries_by_account(
 				gl_filters.update({
 					key: value
 				})
-		if filters.presentation_currency:
-			select_fields = """ debit_in_account_currency as debit, credit_in_account_currency as credit """		
-		else:
-			select_fields = """ debit as debit, credit as credit """		
+		select_fields = """ debit_in_account_currency as debit, credit_in_account_currency as credit """		
 
 		gl_entries = frappe.db.sql("""select posting_date, account, {select_fields}, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 			where company=%(company)s
