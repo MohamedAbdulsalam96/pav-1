@@ -21,23 +21,26 @@ def execute(filters=None):
 		
 		cond=""
 		dim=[]
-		
-		if filters.get(frappe.scrub(party.name)):
-			cond= """ where name in (%s)""" % ( ", ".join(["%s"] * len(filters.get(frappe.scrub(party.name)))))			
-			dim=filters.get(frappe.scrub(party.name))
-		party_filters = {"name": party.name} if filters.get("party") else {}
-		party_parties = frappe.db.sql(
-			"""
-				select
-					name,{party_name_field}
-				from
-					`tab{tab}` {cond}
-			""".format(tab=party.name,party_name_field=party_name_field,cond=cond),tuple(dim), as_dict=True)
-		# parties = frappe.get_all(party, fields = ["name",party_name_field],
-		# 	filters=party_filters,order_by="name")
-		filters.party_type=party.name
+		pn=frappe.scrub(party.name)
+		# frappe.msgprint("{0}".format(pn))
+		if filters.get(pn):
+			filters[pn] = frappe.parse_json(filters.get(pn))
+			cond= """ where name in (%s)""" % ( ", ".join(["%s"] * len(filters.get(pn))))
+			dim=filters.get(pn)
+			# frappe.msgprint("{0}".format(filters.get(pn)))
+			party_filters = {"name": party.name} if filters.get("party") else {}
+			party_parties = frappe.db.sql(
+				"""
+					select
+						name,{party_name_field}
+					from
+						`tab{tab}` {cond}
+				""".format(tab=party.name,party_name_field=party_name_field,cond=cond),tuple(dim), as_dict=True)
+			# parties = frappe.get_all(party, fields = ["name",party_name_field],
+			# 	filters=party_filters,order_by="name")
+			filters.party_type=party.name
 
-		data+=get_data(filters,show_party_name,party_name_field=party_name_field,parties=party_parties)
+			data+=get_data(filters,show_party_name,party_name_field=party_name_field,parties=party_parties)
 
 	
 

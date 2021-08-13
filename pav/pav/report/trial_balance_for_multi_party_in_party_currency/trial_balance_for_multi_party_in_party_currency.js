@@ -70,7 +70,7 @@ frappe.query_reports["Trial Balance for Multi Party in Party Currency"] = {
 			}
 		},
 		{
-			"fieldname":"Employee",
+			"fieldname":"employee",
 			"label": __("Employee"),
 			"fieldtype": "MultiSelectList",
 			get_data: function(txt) {
