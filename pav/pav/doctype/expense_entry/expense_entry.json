@@ -218,7 +218,7 @@
    "no_copy": 1,
    "oldfieldname": "total_claimed_amount",
    "oldfieldtype": "Currency",
-   "options": "payment_currency",
+   "options": "currency",
    "read_only": 1,
    "width": "160px"
   },
@@ -339,7 +339,7 @@
  ],
  "icon": "fa fa-money",
  "is_submittable": 1,
- "modified": "2021-07-12 01:45:18.592714",
+ "modified": "2021-08-15 09:48:09.976069",
  "modified_by": "Administrator",
  "module": "PAV",
  "name": "Expense Entry",
