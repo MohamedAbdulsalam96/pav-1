@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2021-09-08 13:01:58.045060",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "description",
+  "schedule_details",
+  "start_date",
+  "end_date",
+  "periodicity",
+  "no_of_visits",
+  "sales_person",
+  "reference",
+  "serial_no",
+  "sales_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Data",
+   "print_width": "300px",
+   "read_only": 1,
+   "width": "300px"
+  },
+  {
+   "fieldname": "schedule_details",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "oldfieldname": "start_date",
+   "oldfieldtype": "Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "End Date",
+   "oldfieldname": "end_date",
+   "oldfieldtype": "Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "periodicity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Periodicity",
+   "oldfieldname": "periodicity",
+   "oldfieldtype": "Select",
+   "options": "\nWeekly\nMonthly\nQuarterly\nHalf Yearly\nYearly\nRandom"
+  },
+  {
+   "fieldname": "no_of_visits",
+   "fieldtype": "Int",
+   "label": "No of Visits",
+   "oldfieldname": "no_of_visits",
+   "oldfieldtype": "Int"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "oldfieldname": "incharge_name",
+   "oldfieldtype": "Link",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial No",
+   "oldfieldname": "serial_no",
+   "oldfieldtype": "Small Text"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "no_copy": 1,
+   "oldfieldname": "prevdoc_docname",
+   "oldfieldtype": "Data",
+   "options": "Sales Order",
+   "print_hide": 1,
+   "print_width": "150px",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "item_code.name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Opportunity Name",
+   "oldfieldname": "item_name",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Opportunity",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Opportunity",
+   "reqd": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-10-01 19:58:18.924314",
+ "modified_by": "Administrator",
+ "module": "PAV",
+ "name": "Opportunity Schedule Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

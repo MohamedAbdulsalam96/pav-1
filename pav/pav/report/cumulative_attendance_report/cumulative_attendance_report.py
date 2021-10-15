@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2021, Farouk Muharram and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -25,51 +25,49 @@ def execute(filters=None):
 	formatted_data = []
 	columns = get_columns()
 	data = get_data(filters)
+	for emp in data:
+		basic_total = None
+		over_total = None
+		startLate = None
+		endLate = None
+		tLate = None
+		startEr = None
+		endEr = None
+		tEr = None
+		for d in data[emp]:
+			if d[7] == "NOT NULL":
+				temp= delay(d[4], d[3])
+				basic_total = delayTotal(basic_total, temp)
+				
+				temp= delay(d[3], d[5])
+				startLate = delayTotal(startLate, temp)
+				temp = delay(d[6], d[4])
+				endLate = delayTotal(endLate, temp)
 
-	t= timedelta(00,00,00)
-	#dd= timedelta(hours=t.hours,minutes=t.minutes)\
-	empList = []
-	for d in data:
-			startLate = delay(d[3], d[5])
-			endLate = delay(d[6], d[4])
-			tLate = delayTotal(startLate, endLate)
+				temp = delay(d[5], d[3])
+				startEr = delayTotal(startEr, temp)
+				temp = delay(d[4], d[6])
+				endEr = delayTotal(endEr, temp)					
+			elif d[7] == "NULL":
+				temp= delay(d[4], d[3])
+				over_total = delayTotal(over_total, temp)
 
-			startEr = delay(d[5], d[3])
-			endEr = delay(d[4], d[6])
-			tEr = delayTotal(startEr, endEr)
-			tHours=d[4] - d[3] if d[4] and d[3] and d[4] > d[3] else timedelta(00,00,00)
-			if empList:
-				chk = False
-				for e in empList:
-					if e[0] == d[0]:
-						chk = True
-						
-						e[5] = delayTotal(e[5], startLate)
-						e[6] =  delayTotal(e[6], endLate)
-						e[7] =  delayTotal(e[7], tLate)
-						e[8] =  delayTotal(e[8], startEr)
-						e[9] =  delayTotal(e[9], endEr)
-						e[10] = delayTotal(e[10], tEr)
-						e[11] = delayTotal(e[11], tHours)
-				if not chk:
-					empList.append([d[0], d[1], d[2], d[3], d[4], startLate, endLate, tLate, startEr, endEr, tEr, tHours])
-			else:
-				empList.append([d[0], d[1], d[2], d[3], d[4], startLate, endLate, tLate, startEr, endEr, tEr, tHours])
-
-	for d in empList:
-			formatted_data.append({
-			"emponly": d[0],
-			"empname": d[1],
-			"dateonly": d[2],
-			"mintime": d[3],
-			"maxtime": d[4],
-			"late_entry":  d[5],
-			"early_exit": d[6],
-			"delay_total" : to_hours(d[7]) , 
-			"early_entry" : d[8],
-			"late_exit" : d[9], 
-			"early_total" : to_hours(d[10]),
-			"workinghours": to_hours(d[11]),	})
+		tLate = delayTotal(startLate, endLate)
+		tEr = delayTotal(startEr, endEr)
+		tHours = delayTotal(basic_total, over_total)
+		formatted_data.append({
+		"name": emp,
+		"employee": d[0],
+		"basic_total": to_hours(basic_total) if basic_total else basic_total,
+		"over_total": to_hours(over_total) if over_total else over_total,
+		"late_entry":   to_hours(startLate) if startLate else startLate,
+		"early_exit":  to_hours(endLate) if endLate else endLate,
+		"late_total" :  to_hours(tLate) if tLate else tLate,
+		"early_entry" :  to_hours(startEr) if startEr else startEr,
+		"late_exit" : to_hours(endEr) if endEr else endEr,
+		"early_total" :  to_hours(tEr) if tEr else tEr,
+		"working_hours": to_hours(tHours) if tHours else tHours,
+			})
 				
 	formatted_data.extend([{}])
 	return columns, formatted_data
@@ -87,35 +85,47 @@ def to_hours(duration):
 def get_columns():
 	return [
 		{
-			"fieldname": "emponly",
+			"fieldname": "name",
 			"label": _("Employee "),
 			"fieldtype": "Link",
 			"options": "Employee",
 			"width": 120
 		},
 		{
-			"fieldname": "empname",
+			"fieldname": "employee",
 			"label": _("Employee Name"),
 			"fieldtype": "Data",
 			"width": 170
 		},
-		
-		
-                {
+		{
+			"label": _("Shift Total"),
+			"fieldtype": "Data",
+			"fieldname": "basic_total",
+			"width": 75
+
+		},
+		{
+			"label": _("OverTime Total"),
+			"fieldtype": "Data",
+			"fieldname": "over_total",
+			"width": 75
+
+		},
+		{
 			"fieldname": "late_entry",
 			"label": _("Late Entry"),
 			"fieldtype": "Data",
 			"width": 80
 		},
-			        {
+		{
 			"fieldname": "early_exit",
 			"label": _("Early Exit"),
 			"fieldtype": "Data",
 			"width": 80
 		},
 		      {
-			"fieldname": "delay_total",
-			"label": _("Delay Total"),
+			"fieldname": "late_total",
+			"label": _("Late Total"),
 			"fieldtype": "Data",
 			"width": 85
 		},
@@ -138,42 +148,30 @@ def get_columns():
 			"width": 85
 		},
 		 {
-			"fieldname": "workinghours",
+			"fieldname": "working_hours",
 			"label": _("Working Hours"),
 			"fieldtype": "Data",
 			"width": 120
 		},
 	]
-
-def get_conditions(filters):
 	
-	conditions = []
-	if filters.get("employee"): conditions.append("em.employee = %(employee)s")
-	if filters.get("from"): conditions.append("DATE(em.time) >= %(from)s")
-	if filters.get("to"): conditions.append("DATE(em.time) <= %(to)s")	
-	return "where {}".format(" and ".join(conditions)) if conditions else ""
+def get_conditions(filters):
+	condition = " where date(time)>= '%s' and date(time)<= '%s' " % (filters.get("from"), filters.get("to"))
+	if filters.get("employee"):
+		condition += " AND employee ='%s' " % (filters.get('employee'))
+	return condition
 
 
 def get_data(filters):
-	ini_list = frappe.db.sql("""SELECT em.employee as 'emponly',
-		em.employee_name as 'empname', DATE(em.time) as dateonly,
-		(select TIME(MIN(l.time)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as mintime,
-		(select TIME(MAX(l.time)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as maxtime,
+	list_ = frappe.db.sql('''SELECT employee, employee_name, date(time) as ckin_date, shift, TIME(min(time)) as in_time,
+		TIME(max(time)) as out_time, TIME(MAX(shift_start)) as shift_start, TIME(MAX(shift_end)) as shift_end, 
+		IF(ISNULL(shift), 'NULL', 'NOT NULL') as shift_nullable
+		FROM `tabEmployee Checkin` {0} GROUP BY employee, date(time), shift_nullable'''.format(get_conditions(filters)), as_list=1)
 
-		(select TIME(MIN(l.shift_start)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as shift_start,
-		(select TIME(MAX(l.shift_end)) FROM `tabEmployee Checkin` l where l.employee=em.employee and 
-			DATE(l.time)<= DATE(em.time) and DATE(l.time)>= DATE(em.time) limit 1) as shift_end
+	result = {}
+	for d in list_:
+		result.setdefault(d[0], [])
+		result[d[0]].append([d[1], d[2], d[3], d[4], d[5], d[6], d[7], d[8]])
 
-		FROM `tabEmployee Checkin` em
-		{conditions} GROUP BY dateonly, employee
-		""".format(
-			conditions=get_conditions(filters),
-		),
-		filters, as_list=1)
-	##frappe.msgprint("ini_list={0}".format(ini_list))
-
-	return ini_list
+	return result
 
